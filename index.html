@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html>
 
 <head>
   <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -7,6 +8,17 @@
 </head>
 
 <body>
-
-
+  <script>
+    const requestData = async function () {
+      const fortuneData = await d3.csv('./data/Fortune_1000.csv');
+      console.log(fortuneData);
+      const costOfLiving = await d3.csv('./data/cost-of-living-2018.csv');
+      console.log(costOfLiving);
+      const levelsFyi = await d3.csv('./data/Levels_Fyi_Salary_Data.csv');
+      console.log(levelsFyi);
+    }
+    requestData();
+  </script>
 </body>
+
+</html>
