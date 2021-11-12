@@ -3,19 +3,69 @@
 
 <head>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/topojson.v3.min.js"></script>
   <title> Project 2 for INFO 3300 </title>
   <meta charset="UTF-8">
+  <style>
+    .state {
+      fill: lightgrey;
+    }
+
+    .border {
+      stroke: black;
+      stroke-width: 1px;
+      fill: none;
+    }
+  </style>
 </head>
 
 <body>
+
+  <svg id="usmap" height="800" width="900"></svg>
   <script>
+    const svg = d3.select("#usmap");
+    const width = svg.attr("width");
+    const height = svg.attr("height");
+    const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+    const mapWidth = width - margin.left - margin.right;
+    const mapHeight = height - margin.top - margin.bottom;
+    const map = svg.append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+
     const requestData = async function () {
       const fortuneData = await d3.csv('./data/Fortune_1000.csv');
       console.log(fortuneData);
       const costOfLiving = await d3.csv('./data/cost-of-living-2018.csv');
       console.log(costOfLiving);
+
+      const filteredFD = fortuneData.filter((d) => { return d.sector === "Technology"; })
+      console.log(filteredFD);
+
       const levelsFyi = await d3.csv('./data/Levels_Fyi_Salary_Data.csv');
       console.log(levelsFyi);
+
+
+      const usMap = await d3.json("./data/us.json");
+      console.log(usMap);
+
+      var states = topojson.feature(usMap, usMap.objects.states);
+      var statesMesh = topojson.mesh(usMap, usMap.objects.states);
+      var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
+      var path = d3.geoPath().projection(projection);
+
+      map.selectAll("path").data(states.features)
+        .join("path")
+        .attr("class", "state")
+        .attr("note", d => d.id)
+        .attr("d", path);
+
+      map.append("path").datum(statesMesh)
+        .attr("class", "border")
+        .attr("d", path);
+
+
+
     }
     requestData();
   </script>
