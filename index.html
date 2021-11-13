@@ -49,17 +49,32 @@
       const usMap = await d3.json("./data/us.json");
       console.log(usMap);
 
+      const cities = await d3.json("./data/cities.json");
+
+
+      // return the longtitude and latitude of a major city
+      function longLat(cityName) {
+        let theCity = cities.filter((d)=>{return cities.city === cityName});
+        return [theCity.latitude, theCity.longitude]
+      }
+
+      // state object stuff
       var states = topojson.feature(usMap, usMap.objects.states);
       var statesMesh = topojson.mesh(usMap, usMap.objects.states);
       var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
       var path = d3.geoPath().projection(projection);
 
+
+
+      // shade in the states
       map.selectAll("path").data(states.features)
         .join("path")
         .attr("class", "state")
         .attr("note", d => d.id)
         .attr("d", path);
 
+      
+      // draw the borders
       map.append("path").datum(statesMesh)
         .attr("class", "border")
         .attr("d", path);
@@ -68,6 +83,8 @@
 
     }
     requestData();
+
+
   </script>
 </body>
 
