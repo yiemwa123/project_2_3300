@@ -39,6 +39,7 @@
       const costOfLiving = await d3.csv('./data/cost-of-living-2018.csv');
       console.log(costOfLiving);
 
+      // filtered the data by only returning the companies where the sector is listed as Technology
       const filteredFD = fortuneData.filter((d) => { return d.sector === "Technology"; })
       console.log(filteredFD);
 
@@ -54,7 +55,7 @@
 
       // return the longtitude and latitude of a major city
       function longLat(cityName) {
-        let theCity = cities.filter((d)=>{return cities.city === cityName});
+        let theCity = cities.filter((d) => { return cities.city === cityName });
         return [theCity.latitude, theCity.longitude]
       }
 
@@ -73,11 +74,18 @@
         .attr("note", d => d.id)
         .attr("d", path);
 
-      
+
       // draw the borders
       map.append("path").datum(statesMesh)
         .attr("class", "border")
         .attr("d", path);
+
+
+      // plot the long/lat
+      chartArea.selectAll("circle").data(filteredFD).join("circle").attr('cx', function (d) {
+        let lat= projection(longLat(d))[0]
+
+      }).attr('cy', projection(longLat(d))[0]).style("fill", 'black').attr('r', 5);
 
 
 
