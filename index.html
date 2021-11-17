@@ -51,22 +51,7 @@
       console.log(usMap);
 
       const cities = await d3.json("./data/cities.json");
-
-
-      // return the longtitude and latitude of a major city
-      function longLat(cityName) {
-        let theCity = cities.filter((d) => { return cities.city === cityName });
-        if (theCity.length != 0){
-
-          return [theCity.latitude, theCity.longitude];
-
-        }
-
-        else {
-          return 0;
-        }
-        
-      }
+      
 
       // state object stuff
       var states = topojson.feature(usMap, usMap.objects.states);
@@ -90,25 +75,52 @@
         .attr("d", path);
 
       // changing fortune 1000 dataset to become a map with key: company name and value: all other attributes
-      fortune = d3.index(filteredFD, d => d.company);
+      var fortune = d3.index(filteredFD, d => d.company);
       console.log(fortune);
 
       // filtering levelsFyi dataset to only contain companies that are in the fortune 1000 dataset and have the same city name
-      const levelsFyiFiltered = levelsFyi.filter( (d, i) => {
+      // this results in duplicates in the dataset -- entries will have the same company name and be in the same city, but each entry will be a different salary
+      let levelsFyiFiltered = levelsFyi.filter( function (d, i) {
         d.citySplit = d.location.split(",");
         let fortunekey = d.company;
-        return fortune.has(fortunekey) && d.citySplit.includes(fortune.get(fortunekey).company)
+        let companyKey = fortune.get(fortunekey);
+        return ((fortune.has(fortunekey)) && (d.citySplit[0] === companyKey.city) )
       });
       console.log(levelsFyiFiltered);
 
-      // plot the long/lat
-      map.selectAll("circle").data(filteredFD).join("circle").attr('cx', function (d) {
-        let lat= projection(longLat(d))[0]
-        if (lat){
+      // getting unique cities from levelsFyi data 
+      let duplicateCities = [];
+      fortune.forEach( d => {
+       duplicateCities.push(d.city);
+      })
 
-        }
+      let uniqueCities = duplicateCities.filter((city, i, ar) => ar.indexOf(city) === i);
+      console.log(duplicateCities);
+      console.log(uniqueCities);
 
-      }).attr('cy', projection(longLat(d))[0]).style("fill", 'black').attr('r', 5);
+
+      // make the cities data a map with key: city, value: lat/long
+      var filteredCities = cities.filter( function(d) {
+        return uniqueCities.includes(d.city);
+      })
+      console.log(filteredCities); // not all cities in the company dataset are included in the lat/long dataset
+
+
+      // get the latitude and longitutde positions for the city locations of companies
+      filteredCities.forEach( d => {
+        d.Position = projection( [d.longitude, d.latitude] );
+        console.log(d.Position);
+      })
+
+      // plot the cities with longitude and latitude
+      map.selectAll("circle.company")
+         .data(filteredCities)
+         .join("circle")
+         .attr("class", "company")
+         .attr('cx', d => d.Position[0])
+         .attr('cy', d => d.Position[1])
+         .style("fill", 'black')
+         .attr('r', 5);
 
 
 
