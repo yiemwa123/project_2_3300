@@ -79,6 +79,17 @@
         .attr("class", "border")
         .attr("d", path);
 
+      // changing fortune 1000 dataset to become a map with key: company name and value: all other attributes
+      fortune = d3.index(filteredFD, d => d.company);
+      console.log(fortune);
+
+      // filtering levelsFyi dataset to only contain companies that are in the fortune 1000 dataset and have the same city name
+      const levelsFyiFiltered = levelsFyi.filter( (d, i) => {
+        d.citySplit = d.location.split(",");
+        let fortunekey = d.company;
+        return fortune.has(fortunekey) && d.citySplit.includes(fortune.get(fortunekey).company)
+      });
+      console.log(levelsFyiFiltered)
 
 
     }
