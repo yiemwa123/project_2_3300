@@ -61,8 +61,6 @@
       var statesMesh = topojson.mesh(usMap, usMap.objects.states);
       var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
       var path = d3.geoPath().projection(projection);
-
-
       let viewport = map.append("g");
 
       viewport.selectAll(".state").data(states.features)
@@ -78,18 +76,18 @@
 
 
 
-      // shade in the states
-      map.selectAll("path").data(states.features)
-        .join("path")
-        .attr("class", "state")
-        .attr("note", d => d.id)
-        .attr("d", path);
+      // // shade in the states
+      // map.selectAll("path").data(states.features)
+      //   .join("path")
+      //   .attr("class", "state")
+      //   .attr("note", d => d.id)
+      //   .attr("d", path);
 
 
-      // draw the borders
-      map.append("path").datum(statesMesh)
-        .attr("class", "border")
-        .attr("d", path);
+      // // draw the borders
+      // map.append("path").datum(statesMesh)
+      //   .attr("class", "border")
+      //   .attr("d", path);
 
       // changing fortune 1000 dataset to become a map with key: company name and value: all other attributes
       var fortune = d3.index(filteredFD, d => d.company);
@@ -130,7 +128,7 @@
       })
 
       // plot the cities with longitude and latitude
-      map.selectAll("circle.company")
+      viewport.selectAll("circle.company")
         .data(filteredCities)
         .join("circle")
         .attr("class", "company")
@@ -150,7 +148,7 @@
       map.call(zoom.transform, d3.zoomIdentity);
 
 
-      viewport.selectAll("state").on("click", clicked);
+      viewport.selectAll(".state").on("click", clicked);
 
 
 
@@ -158,8 +156,16 @@
 
 
         viewport.attr("transform", transform.toString());
+
         viewport.select(".border")
           .style("stroke-width", 2 / transform.k);
+
+        viewport.selectAll("circle.company")
+          .attr('r', transform.k>=2 ? 6/transform.k : 4);
+
+        console.log( viewport.selectAll("circle.company").attr('r'));
+
+
 
 
 
@@ -170,6 +176,8 @@
 
 
       function clicked(event, d) {
+
+        console.log(d);
 
         let bounds = path.bounds(d.geometry);
         console.log(bounds);
@@ -185,6 +193,9 @@
         let newTransform = d3.zoomIdentity
           .translate(translate[0], translate[1])
           .scale(scale);
+
+        // viewport.selectAll("circle.company")
+        //   .attr('r', 1);
 
         map.transition().duration(1000).call(zoom.transform, newTransform);
 
