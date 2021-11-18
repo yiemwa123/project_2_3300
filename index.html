@@ -76,19 +76,6 @@
 
 
 
-      // // shade in the states
-      // map.selectAll("path").data(states.features)
-      //   .join("path")
-      //   .attr("class", "state")
-      //   .attr("note", d => d.id)
-      //   .attr("d", path);
-
-
-      // // draw the borders
-      // map.append("path").datum(statesMesh)
-      //   .attr("class", "border")
-      //   .attr("d", path);
-
       // changing fortune 1000 dataset to become a map with key: company name and value: all other attributes
       var fortune = d3.index(filteredFD, d => d.company);
       console.log(fortune);
@@ -163,8 +150,6 @@
         viewport.selectAll("circle.company")
           .attr('r', transform.k>=2 ? 6/transform.k : 4);
 
-        console.log( viewport.selectAll("circle.company").attr('r'));
-
 
 
 
@@ -193,9 +178,6 @@
         let newTransform = d3.zoomIdentity
           .translate(translate[0], translate[1])
           .scale(scale);
-
-        // viewport.selectAll("circle.company")
-        //   .attr('r', 1);
 
         map.transition().duration(1000).call(zoom.transform, newTransform);
 
