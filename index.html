@@ -33,6 +33,9 @@
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 
+
+
+
     const requestData = async function () {
       const fortuneData = await d3.csv('./data/Fortune_1000.csv');
       console.log(fortuneData);
@@ -51,13 +54,27 @@
       console.log(usMap);
 
       const cities = await d3.json("./data/cities.json");
-      
+
 
       // state object stuff
       var states = topojson.feature(usMap, usMap.objects.states);
       var statesMesh = topojson.mesh(usMap, usMap.objects.states);
       var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
       var path = d3.geoPath().projection(projection);
+
+
+      let viewport = map.append("g");
+
+      viewport.selectAll(".state").data(states.features)
+        .enter()
+        .append("path")
+        .attr("class", "state")
+        .attr("d", path);
+
+      viewport.append("path")
+        .datum(statesMesh)
+        .attr("class", "border")
+        .attr("d", path);
 
 
 
@@ -80,18 +97,18 @@
 
       // filtering levelsFyi dataset to only contain companies that are in the fortune 1000 dataset and have the same city name
       // this results in duplicates in the dataset -- entries will have the same company name and be in the same city, but each entry will be a different salary
-      let levelsFyiFiltered = levelsFyi.filter( function (d, i) {
+      let levelsFyiFiltered = levelsFyi.filter(function (d, i) {
         d.citySplit = d.location.split(",");
         let fortunekey = d.company;
         let companyKey = fortune.get(fortunekey);
-        return ((fortune.has(fortunekey)) && (d.citySplit[0] === companyKey.city) )
+        return ((fortune.has(fortunekey)) && (d.citySplit[0] === companyKey.city))
       });
       console.log(levelsFyiFiltered);
 
       // getting unique cities from levelsFyi data 
       let duplicateCities = [];
-      fortune.forEach( d => {
-       duplicateCities.push(d.city);
+      fortune.forEach(d => {
+        duplicateCities.push(d.city);
       })
 
       let uniqueCities = duplicateCities.filter((city, i, ar) => ar.indexOf(city) === i);
@@ -100,31 +117,88 @@
 
 
       // make the cities data a map with key: city, value: lat/long
-      var filteredCities = cities.filter( function(d) {
+      var filteredCities = cities.filter(function (d) {
         return uniqueCities.includes(d.city);
       })
       console.log(filteredCities); // not all cities in the company dataset are included in the lat/long dataset
 
 
       // get the latitude and longitutde positions for the city locations of companies
-      filteredCities.forEach( d => {
-        d.Position = projection( [d.longitude, d.latitude] );
+      filteredCities.forEach(d => {
+        d.Position = projection([d.longitude, d.latitude]);
         console.log(d.Position);
       })
 
       // plot the cities with longitude and latitude
       map.selectAll("circle.company")
-         .data(filteredCities)
-         .join("circle")
-         .attr("class", "company")
-         .attr('cx', d => d.Position[0])
-         .attr('cy', d => d.Position[1])
-         .style("fill", 'black')
-         .attr('r', 5);
+        .data(filteredCities)
+        .join("circle")
+        .attr("class", "company")
+        .attr('cx', d => d.Position[0])
+        .attr('cy', d => d.Position[1])
+        .style("fill", 'black')
+        .attr('r', 5);
+
+
+
+      var zoom = d3.zoom()
+        .scaleExtent([1, 10])
+        .on("zoom", mapZoomed);
+
+      map.call(zoom);
+
+      map.call(zoom.transform, d3.zoomIdentity);
+
+
+      viewport.selectAll("state").on("click", clicked);
+
+
+
+      function mapZoomed({ transform }) {
+
+
+        viewport.attr("transform", transform.toString());
+        viewport.select(".border")
+          .style("stroke-width", 2 / transform.k);
+
+
+
+      }
+
+
+
+
+
+      function clicked(event, d) {
+
+        let bounds = path.bounds(d.geometry);
+        console.log(bounds);
+        let dx = bounds[1][0] - bounds[0][0];
+        let dy = bounds[1][1] - bounds[0][1];
+        let x = (bounds[0][0] + bounds[1][0]) / 2;
+        let y = (bounds[0][1] + bounds[1][1]) / 2;
+
+        let scale = Math.max(1, Math.min(10, 0.9 / Math.max(dx / mapWidth,
+          dy / mapHeight)));
+        let translate = [mapWidth / 2 - x * scale, mapHeight / 2 - y * scale];
+
+        let newTransform = d3.zoomIdentity
+          .translate(translate[0], translate[1])
+          .scale(scale);
+
+        map.transition().duration(1000).call(zoom.transform, newTransform);
+
+      }
+
 
 
 
     }
+
+
+
+
+
     requestData();
 
 
