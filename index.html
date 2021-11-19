@@ -76,7 +76,7 @@
 
 
 
-      // changing fortune 1000 dataset to become a map with key: company name and value: all other attributes
+      // changing fortune 1000 dataset tox become a map with key: company name and value: all other attributes
       var fortune = d3.index(filteredFD, d => d.company);
       console.log(fortune);
 
@@ -111,18 +111,54 @@
       // get the latitude and longitutde positions for the city locations of companies
       filteredCities.forEach(d => {
         d.Position = projection([d.longitude, d.latitude]);
-        console.log(d.Position);
+        // console.log(d.Position);
       })
+      var companies = new Array();
+      var newDict = {};
+      // created new column companies that contains array of all companies located in that city
+      filteredCities.forEach((b, i) => {
+        fortune.forEach((d, i) => {
+          if (d.city === b['city']) {
+            companies.push(d['company']);
+          }
+        })
+        newDict[b['city']] = companies;
+        b.cityAndSalary = newDict;
+        newDict = {};
+        companies = [];
 
-      // plot the cities with longitude and latitude
-      viewport.selectAll("circle.company")
+      })
+      // Average salary and company 
+      let count = 0;
+      let sum = 0;
+      let salaries = {};
+      fortune.forEach((d, i) => {
+        levelsFyiFiltered.forEach((b, i) => {
+          if (b['company'] === d['company']) {
+            count = count + 1;
+            sum = sum + b['totalyearlycompensation'];
+          };
+        })
+        let avgSalary = sum / count;
+        d['avgSalary'] = avgSalary;
+        count = 0;
+        sum = 0;
+      })
+      console.log(fortune);
+      // Cost of living in city 
+      // let filteredCitiesCompaniesSalaries = filteredCitiesandCompanies.forEach((d, i) => {
+
+      // })
+      // // plot the cities with longitude and latitude and add companies to them
+      var circles = viewport.selectAll("circle.company")
         .data(filteredCities)
         .join("circle")
         .attr("class", "company")
         .attr('cx', d => d.Position[0])
         .attr('cy', d => d.Position[1])
         .style("fill", 'black')
-        .attr('r', 5);
+        .attr('r', 5)
+        .attr('company', 'hello');
 
 
 
@@ -148,15 +184,8 @@
           .style("stroke-width", 2 / transform.k);
 
         viewport.selectAll("circle.company")
-          .attr('r', transform.k>=2 ? 6/transform.k : 4);
-
-
-
-
-
+          .attr('r', transform.k >= 2 ? 6 / transform.k : 4);
       }
-
-
 
 
 
@@ -183,6 +212,7 @@
 
       }
 
+<<<<<<< HEAD
 
       let companytest=levelsFyiFiltered.filter((d) => { return d.company === "Apple"; })
 
@@ -193,6 +223,48 @@
 
 
 
+=======
+      // let tooltipWidth = 120;
+      // let tooltipHeight = 40;
+
+      // let tooltip = viewport.attr("class", "tooltip")
+      //   .attr("visibility", "hidden");
+      // tooltip.append("rect")
+      //   .attr("fill", "black")
+      //   .attr("opacity", 0.9)
+      //   .attr("x", -tooltipWidth / 2.0)
+      //   .attr("y", 0)
+      //   .attr("width", tooltipWidth)
+      //   .attr("height", tooltipHeight)
+      // let txt = tooltip.append("text")
+      //   .attr("fill", "white")
+      //   .attr("text-anchor", "middle")
+      //   .attr("alignment-baseline", "hanging")
+      //   .attr("x", 0)
+      //   .attr("y", 2);
+      // let txt2 = tooltip.append("text")
+      //   .attr("fill", "white")
+      //   .attr("text-anchor", "middle")
+      //   .attr("alignment-baseline", "hanging")
+      //   .attr("x", 0)
+      //   .attr("y", 22);
+
+
+      circles.on("click", mouseClicked);
+      function mouseClicked() {
+        // tooltip.style("visibility", "visible");
+        d3.select(this)
+          .transition().duration(200)
+          .attr("stroke-width", 0)
+          .attr("r", 5)
+          .attr("opacity", 0.4);
+        let company = d3.select(this);
+        console.log(this);
+        // find city for company
+        // find salary for company from levels.fyi 
+        let city = d3.selectAll("circle.company");
+      }
+>>>>>>> 0aa3c6250067f47eb07801cb9b2a14ca0f7dc047
 
     }
 
