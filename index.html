@@ -108,47 +108,67 @@
       console.log(filteredCities); // not all cities in the company dataset are included in the lat/long dataset
 
 
-      // get the latitude and longitutde positions for the city locations of companies
+      // get the latitude and longitude positions for the city locations of companies
       filteredCities.forEach(d => {
         d.Position = projection([d.longitude, d.latitude]);
         // console.log(d.Position);
       })
-      var companies = new Array();
-      var newDict = {};
-      // created new column companies that contains array of all companies located in that city
-      filteredCities.forEach((b, i) => {
-        fortune.forEach((d, i) => {
-          if (d.city === b['city']) {
-            companies.push(d['company']);
+
+      // changing city name format to just the name of the city
+      costOfLiving.forEach((d, i) => {
+        d['City'] = d['City'].substring(0, d['City'].indexOf(','));
+      })
+
+      // making totalyearly compensation and salary ints 
+      levelsFyiFiltered.forEach((d, i) => {
+        d['basesalary'] = parseInt(d['basesalary']);
+        d['totalyearlycompensation'] = parseInt(d['totalyearlycompensation']);
+      })
+
+      // Created cost of living index column for that city 
+      filteredCities.forEach((d, i) => {
+        costOfLiving.forEach((b, i) => {
+          if (b['City'] === d['city']) {
+            d['COL'] = b['Cost of Living Index'];
           }
         })
-        newDict[b['city']] = companies;
-        b.cityAndSalary = newDict;
-        newDict = {};
-        companies = [];
+      })
+
+      // Average total yearly compensation for each company 
+      let avgSalaries = [];
+      let counts = {};
+      let companiesAndSalary = {};
+      levelsFyiFiltered.forEach((b, i) => {
+        let tempCompany = b['company'];
+        if (!counts[tempCompany]) {
+          counts[tempCompany] = 0;
+          avgSalaries[tempCompany] = 0;
+        }
+        counts[tempCompany] = counts[tempCompany] + 1;
+        avgSalaries[tempCompany] = avgSalaries[tempCompany] + b['totalyearlycompensation'];
+
+      });
+      Object.keys(avgSalaries).map(function (key, index) {
+        avgSalaries[key] = Math.round(avgSalaries[key] / counts[key]);
+      })
+      // created companies column that contains array of all companies located in that city
+      var companies = {};
+      filteredCities.forEach((b, i) => {
+        levelsFyiFiltered.forEach((d, i) => {
+          let temp = d['citySplit'];
+          if ((temp[0] === b.city) && !(b.city in companies)) {
+            companies[d['company']] = avgSalaries[d['company']]
+          }
+        });
+        b.companies = companies;
+        companies = {};
 
       })
-      // Average salary and company 
-      let count = 0;
-      let sum = 0;
-      let salaries = {};
-      fortune.forEach((d, i) => {
-        levelsFyiFiltered.forEach((b, i) => {
-          if (b['company'] === d['company']) {
-            count = count + 1;
-            sum = sum + b['totalyearlycompensation'];
-          };
-        })
-        let avgSalary = sum / count;
-        d['avgSalary'] = avgSalary;
-        count = 0;
-        sum = 0;
-      })
-      console.log(fortune);
-      // Cost of living in city 
-      // let filteredCitiesCompaniesSalaries = filteredCitiesandCompanies.forEach((d, i) => {
+      console.log(filteredCities);
 
-      // })
+
+
+
       // // plot the cities with longitude and latitude and add companies to them
       var circles = viewport.selectAll("circle.company")
         .data(filteredCities)
@@ -248,16 +268,11 @@
       circles.on("click", mouseClicked);
       function mouseClicked() {
         // tooltip.style("visibility", "visible");
-        d3.select(this)
-          .transition().duration(200)
-          .attr("stroke-width", 0)
-          .attr("r", 5)
-          .attr("opacity", 0.4);
         let company = d3.select(this);
         console.log(this);
         // find city for company
         // find salary for company from levels.fyi 
-        let city = d3.selectAll("circle.company");
+        // find cost of living 
       }
 
     }
