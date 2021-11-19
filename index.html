@@ -84,7 +84,7 @@
         d.citySplit = d.location.split(",");
         let fortunekey = d.company;
         let companyKey = fortune.get(fortunekey);
-        return ((fortune.has(fortunekey))  )
+        return ((fortune.has(fortunekey)) && (d.citySplit[0] === companyKey.city) )
       });
       console.log(levelsFyiFiltered); 
 
