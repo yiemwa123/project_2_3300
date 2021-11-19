@@ -58,6 +58,7 @@
 
       // state object stuff
       var states = topojson.feature(usMap, usMap.objects.states);
+
       var statesMesh = topojson.mesh(usMap, usMap.objects.states);
       var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
       var path = d3.geoPath().projection(projection);
@@ -106,6 +107,8 @@
         return uniqueCities.includes(d.city);
       })
       console.log(filteredCities); // not all cities in the company dataset are included in the lat/long dataset
+
+      // filteredCities.push([{"COL": "1000000", "Position": [11,23], "companies": {"hellotest", city" : "test"}])
 
 
       // adding cities that don't have longitude and latitude
@@ -187,19 +190,26 @@
       })
       console.log(filteredCities);
 
-
-
+      // filtered out cities without companies
+      var filteredNewCities = filteredCities.filter(function (d) {
+        return Object.keys(d.companies).length !== 0;
+      })
+      console.log(filteredNewCities);
 
       // // plot the cities with longitude and latitude and add companies to them
       var circles = viewport.selectAll("circle.company")
-        .data(filteredCities)
+        .data(filteredNewCities)
         .join("circle")
         .attr("class", "company")
         .attr('cx', d => d.Position[0])
         .attr('cy', d => d.Position[1])
         .style("fill", 'black')
         .attr('r', 5)
-        .attr('company', 'hello');
+        .attr('company', d => d['company']);
+
+
+      // var cityLabel = viewport.selectAll("text.cityname").data(filteredCities).join("text").style("font-size", "12px" ).text(d => d.city).attr('x', d => d.Position[0] + 5)
+      //   .attr('y', d => d.Position[1] + 5).attr("class", "cityname");
 
 
 
@@ -226,7 +236,15 @@
 
         viewport.selectAll("circle.company")
           .attr('r', transform.k >= 2 ? 6 / transform.k : 4);
+
+        viewport.selectAll("text.cityname").data(filteredCities).join("text").style("font-size", (transform.k > 3) ? "2px" : "0px").text(d => d.city).attr('x', d => d.Position[0] + 3)
+          .attr('y', d => d.Position[1]-1).attr("class", "cityname");
+
       }
+
+
+      console.log(filteredCities)
+
 
 
 
@@ -254,17 +272,10 @@
       }
 
 
-      let companytest=levelsFyiFiltered.filter((d) => { return d.company === "Apple"; })
-
-      console.log(companytest)
-
-
-    
-      // let tooltipWidth = 120;
-      // let tooltipHeight = 40;
-
+main
       // let tooltip = viewport.attr("class", "tooltip")
       //   .attr("visibility", "hidden");
+
       // tooltip.append("rect")
       //   .attr("fill", "black")
       //   .attr("opacity", 0.9)
@@ -289,14 +300,18 @@
       circles.on("click", mouseClicked);
       function mouseClicked() {
         // tooltip.style("visibility", "visible");
-        let company = d3.select(this);
-        console.log(this);
+        let company = d3.select(this.company);
+        console.log(company)
         // find city for company
         // find salary for company from levels.fyi 
         // find cost of living 
       }
 
+      console.log(states);
+
     }
+
+
 
 
 
