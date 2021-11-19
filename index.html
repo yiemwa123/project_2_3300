@@ -61,7 +61,6 @@
 
         // console.log(stateName[0]);
         states.features.forEach((d, i) => {
-
           // console.log(d.id);
           // console.log(stateName[d.id]);
 
@@ -118,15 +117,31 @@
         // console.log(salary_dict);
 
         var state_dict = {};
-        var company_total = 0;
+
+        // helper to sum a list of ints
+        function sum(data) {
+          let sum = data.reduce((a, b) => {
+            return Number(a) + Number(b);
+          });
+          // console.log(data);
+          // console.log(sum);
+          return sum / data.length;
+        }
 
         for ([key, val] of Object.entries(salary_dict)) {
           if (val.state in state_dict) {
-            state_dict[val.state]++;
-            company_total++;
+            state_dict[val.state]["count"]++;
+            let curr_count = state_dict[val.state]["count"];
+            let old_total = state_dict[val.state]["avg_salary"] * curr_count;
+
+            let new_tot = old_total + sum(val.salary);
+
+            state_dict[val.state]["avg_salary"] = new_tot / curr_count;
           } else {
-            state_dict[val.state] = 1;
-            company_total++;
+            state_dict[val.state] = {
+              count: 1,
+              avg_salary: sum(val.salary),
+            };
           }
         }
         console.log(state_dict);
