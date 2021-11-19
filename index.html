@@ -231,7 +231,7 @@
         // console.log(d);
 
         let bounds = path.bounds(d.geometry);
-        console.log(bounds);
+        // console.log(bounds);
         let dx = bounds[1][0] - bounds[0][0];
         let dy = bounds[1][1] - bounds[0][1];
         let x = (bounds[0][0] + bounds[1][0]) / 2;
@@ -250,31 +250,30 @@
       }
 
 
-      let tooltipWidth = 120;
-      let tooltipHeight = 40;
+      let tooltipWidth = 200;
+      let tooltipHeight = 150;
       let tooltip = svg.append('g').attr("class", "tooltip")
         .attr("visibility", "hidden");
 
       tooltip.append("rect")
         .attr("fill", "black")
         .attr("opacity", 0.9)
-        .attr("x", -tooltipWidth / 2.0)
-        .attr("y", 0)
+        .attr("x", 570)
+        .attr("y", 25)
         .attr("width", tooltipWidth)
         .attr("height", tooltipHeight)
       let txt = tooltip.append("text")
         .attr("fill", "white")
         .attr("text-anchor", "middle")
         .attr("alignment-baseline", "hanging")
-        .attr("x", 0)
-        .attr("y", 2);
+        .attr("x", 650)
+        .attr("y", 70);
       let txt2 = tooltip.append("text")
         .attr("fill", "white")
         .attr("text-anchor", "middle")
         .attr("alignment-baseline", "hanging")
-        .attr("x", 0)
-        .attr("y", 22);
-
+        .attr("x", 650)
+        .attr("y", 90);
 
       circles.on("click", mouseClicked);
       function mouseClicked() {
@@ -284,9 +283,13 @@
         let circleCompanies = circle.datum().companies;
         // find city for company
         let circleCities = circle.datum().city;
+        // console.log(circleCities);
         // find cost of living 
         let circleCoL = circle.datum().COL;
         console.log(circleCoL);
+
+        txt.text(JSON.stringify(circleCompanies));
+        txt2.text(circleCoL);
 
 
       }
