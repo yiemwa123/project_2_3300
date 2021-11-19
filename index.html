@@ -397,6 +397,26 @@
           .attr("r", transform.k >= 2 ? 6 / transform.k : 4)
           .style("stroke-width", transform.k >= 1 ? 2 / transform.k : 0.5);
 
+        circles.on("mouseover", function () {
+
+          let circle = d3.select(this).datum()
+
+
+          viewport.append("text").attr("class", "city").text(circle.city).style("font-size", `${20/transform.k}`).attr("x", circle.Position[0] + 2).attr("y", circle.Position[1] + 2)
+
+
+        });
+
+
+        circles.on("mouseout", function () {
+
+
+
+          d3.select(".city").remove();
+
+
+        });
+
 
         // var x_loc = d3.select(".labelThing").attr("x")
 
@@ -453,7 +473,11 @@
 
       viewport.selectAll(".state").on("click", clicked);
 
-  
+
+
+
+
+
 
 
 
@@ -467,6 +491,8 @@
       circles.on("click", function () {
 
         tooltip.style("visibility", "visible");
+
+        circles.style("fill", "black");
 
         d3.select(this).style("fill", "white");
 
