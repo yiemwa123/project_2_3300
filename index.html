@@ -486,7 +486,7 @@
         // txt2.text(circleCoL);
 
         d3.select(".labelThing").attr("x", circle.Position[0] + 5)
-          .attr("y", circle.Position[1] + 20)
+          .attr("y", circle.Position[1] + 10)
 
 
         var company_and_salary = JSON.stringify(circleCompanies);
@@ -495,11 +495,11 @@
         var average_sal = company_and_salary.substr(company_and_salary.indexOf(':') + 1, company_and_salary.indexOf('}') - 1);
         console.log(average_sal);
         txt.text("Company: " + company_name).attr("x", circle.Position[0] + 10)
-          .attr("y", circle.Position[1] + 20 + 10);
-        txt2.text("Average Salary: " + average_sal.substr(0, average_sal.length - 1)).attr("x", circle.Position[0] + 10)
-          .attr("y", circle.Position[1] + 20 + 30);;
+          .attr("y", circle.Position[1] + 30);
+        txt2.text("Average Salary: $" + average_sal.substr(0, average_sal.length - 1)).attr("x", circle.Position[0] + 10)
+          .attr("y", circle.Position[1] + 50);;
         txt3.text("City: " + circleCities).attr("x", circle.Position[0] + 10)
-          .attr("y", circle.Position[1] + 20 + 50);;
+          .attr("y", circle.Position[1] + 70);;
 
 
       });
