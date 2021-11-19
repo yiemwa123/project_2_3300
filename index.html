@@ -6,9 +6,9 @@
     <title>Project 2 for INFO 3300</title>
     <meta charset="UTF-8" />
     <style>
-      /* .state {
+      .state {
         fill: lightgrey;
-      } */
+      }
 
       .border {
         stroke: black;
@@ -67,6 +67,7 @@
           .append("path")
           .attr("class", "state")
           .attr("d", path);
+          .attr("state", )
 
         viewport
           .append("path")
@@ -122,162 +123,164 @@
           .domain(minMax)
           .range(["#fff", "#d1e8ed", "#adc2da", "#8879b3", "#762b80"]);
 
-        map
-          .selectAll(".state")
-          .style("fill", (d) => colorScale(stateIdCounts[d.id]));
-        // console.log(state_dict);
+        map.selectAll(".state").style(
+          "fill",
+          (d) => console.log(d)
+          // colorScale(state_dict[d.id])
+        );
+        console.log(state_dict);
 
-        // // getting unique cities from levelsFyi data
-        // let duplicateCities = [];
-        // fortune.forEach(d => {
-        //   duplicateCities.push(d.city);
+        // getting unique cities from levelsFyi data
+        let duplicateCities = [];
+        fortune.forEach(d => {
+          duplicateCities.push(d.city);
+        })
+
+        let uniqueCities = duplicateCities.filter((city, i, ar) => ar.indexOf(city) === i);
+        console.log(duplicateCities);
+        console.log(uniqueCities);
+
+        // make the cities data a map with key: city, value: lat/long
+        var filteredCities = cities.filter(function (d) {
+          return uniqueCities.includes(d.city);
+        })
+        console.log(filteredCities); // not all cities in the company dataset are included in the lat/long dataset
+
+        // get the latitude and longitutde positions for the city locations of companies
+        filteredCities.forEach(d => {
+          d.Position = projection([d.longitude, d.latitude]);
+          // console.log(d.Position);
+        })
+        var companies = new Array();
+        var newDict = {};
+        // created new column companies that contains array of all companies located in that city
+        filteredCities.forEach((b, i) => {
+          fortune.forEach((d, i) => {
+            if (d.city === b['city']) {
+              companies.push(d['company']);
+            }
+          })
+          newDict[b['city']] = companies;
+          b.cityAndSalary = newDict;
+          newDict = {};
+          companies = [];
+
+        })
+        // Average salary and company
+        let count = 0;
+        let sum = 0;
+        let salaries = {};
+        fortune.forEach((d, i) => {
+          levelsFyiFiltered.forEach((b, i) => {
+            if (b['company'] === d['company']) {
+              count = count + 1;
+              sum = sum + b['totalyearlycompensation'];
+            };
+          })
+          let avgSalary = sum / count;
+          d['avgSalary'] = avgSalary;
+          count = 0;
+          sum = 0;
+        })
+        console.log(fortune);
+        // Cost of living in city
+        // let filteredCitiesCompaniesSalaries = filteredCitiesandCompanies.forEach((d, i) => {
+
         // })
+        // // plot the cities with longitude and latitude and add companies to them
+        var circles = viewport.selectAll("circle.company")
+          .data(filteredCities)
+          .join("circle")
+          .attr("class", "company")
+          .attr('cx', d => d.Position[0])
+          .attr('cy', d => d.Position[1])
+          .style("fill", 'black')
+          .attr('r', 5)
+          .attr('company', 'hello');
 
-        // let uniqueCities = duplicateCities.filter((city, i, ar) => ar.indexOf(city) === i);
-        // console.log(duplicateCities);
-        // console.log(uniqueCities);
+        var zoom = d3.zoom()
+          .scaleExtent([1, 10])
+          .on("zoom", mapZoomed);
 
-        // // make the cities data a map with key: city, value: lat/long
-        // var filteredCities = cities.filter(function (d) {
-        //   return uniqueCities.includes(d.city);
-        // })
-        // console.log(filteredCities); // not all cities in the company dataset are included in the lat/long dataset
+        map.call(zoom);
 
-        // // get the latitude and longitutde positions for the city locations of companies
-        // filteredCities.forEach(d => {
-        //   d.Position = projection([d.longitude, d.latitude]);
-        //   // console.log(d.Position);
-        // })
-        // var companies = new Array();
-        // var newDict = {};
-        // // created new column companies that contains array of all companies located in that city
-        // filteredCities.forEach((b, i) => {
-        //   fortune.forEach((d, i) => {
-        //     if (d.city === b['city']) {
-        //       companies.push(d['company']);
-        //     }
-        //   })
-        //   newDict[b['city']] = companies;
-        //   b.cityAndSalary = newDict;
-        //   newDict = {};
-        //   companies = [];
+        map.call(zoom.transform, d3.zoomIdentity);
 
-        // })
-        // // Average salary and company
-        // let count = 0;
-        // let sum = 0;
-        // let salaries = {};
-        // fortune.forEach((d, i) => {
-        //   levelsFyiFiltered.forEach((b, i) => {
-        //     if (b['company'] === d['company']) {
-        //       count = count + 1;
-        //       sum = sum + b['totalyearlycompensation'];
-        //     };
-        //   })
-        //   let avgSalary = sum / count;
-        //   d['avgSalary'] = avgSalary;
-        //   count = 0;
-        //   sum = 0;
-        // })
-        // console.log(fortune);
-        // // Cost of living in city
-        // // let filteredCitiesCompaniesSalaries = filteredCitiesandCompanies.forEach((d, i) => {
+        viewport.selectAll(".state").on("click", clicked);
 
-        // // })
-        // // // plot the cities with longitude and latitude and add companies to them
-        // var circles = viewport.selectAll("circle.company")
-        //   .data(filteredCities)
-        //   .join("circle")
-        //   .attr("class", "company")
-        //   .attr('cx', d => d.Position[0])
-        //   .attr('cy', d => d.Position[1])
-        //   .style("fill", 'black')
-        //   .attr('r', 5)
-        //   .attr('company', 'hello');
+        function mapZoomed({ transform }) {
 
-        // var zoom = d3.zoom()
-        //   .scaleExtent([1, 10])
-        //   .on("zoom", mapZoomed);
+          viewport.attr("transform", transform.toString());
 
-        // map.call(zoom);
+          viewport.select(".border")
+            .style("stroke-width", 2 / transform.k);
 
-        // map.call(zoom.transform, d3.zoomIdentity);
+          viewport.selectAll("circle.company")
+            .attr('r', transform.k >= 2 ? 6 / transform.k : 4);
+        }
 
-        // viewport.selectAll(".state").on("click", clicked);
+        function clicked(event, d) {
 
-        // function mapZoomed({ transform }) {
+          console.log(d);
 
-        //   viewport.attr("transform", transform.toString());
+          let bounds = path.bounds(d.geometry);
+          console.log(bounds);
+          let dx = bounds[1][0] - bounds[0][0];
+          let dy = bounds[1][1] - bounds[0][1];
+          let x = (bounds[0][0] + bounds[1][0]) / 2;
+          let y = (bounds[0][1] + bounds[1][1]) / 2;
 
-        //   viewport.select(".border")
-        //     .style("stroke-width", 2 / transform.k);
+          let scale = Math.max(1, Math.min(10, 0.9 / Math.max(dx / mapWidth,
+            dy / mapHeight)));
+          let translate = [mapWidth / 2 - x * scale, mapHeight / 2 - y * scale];
 
-        //   viewport.selectAll("circle.company")
-        //     .attr('r', transform.k >= 2 ? 6 / transform.k : 4);
-        // }
+          let newTransform = d3.zoomIdentity
+            .translate(translate[0], translate[1])
+            .scale(scale);
 
-        // function clicked(event, d) {
+          map.transition().duration(1000).call(zoom.transform, newTransform);
 
-        //   console.log(d);
 
-        //   let bounds = path.bounds(d.geometry);
-        //   console.log(bounds);
-        //   let dx = bounds[1][0] - bounds[0][0];
-        //   let dy = bounds[1][1] - bounds[0][1];
-        //   let x = (bounds[0][0] + bounds[1][0]) / 2;
-        //   let y = (bounds[0][1] + bounds[1][1]) / 2;
 
-        //   let scale = Math.max(1, Math.min(10, 0.9 / Math.max(dx / mapWidth,
-        //     dy / mapHeight)));
-        //   let translate = [mapWidth / 2 - x * scale, mapHeight / 2 - y * scale];
+        // let tooltipWidth = 120;
+        // let tooltipHeight = 40;
 
-        //   let newTransform = d3.zoomIdentity
-        //     .translate(translate[0], translate[1])
-        //     .scale(scale);
+        // let tooltip = viewport.attr("class", "tooltip")
+        //   .attr("visibility", "hidden");
+        // tooltip.append("rect")
+        //   .attr("fill", "black")
+        //   .attr("opacity", 0.9)
+        //   .attr("x", -tooltipWidth / 2.0)
+        //   .attr("y", 0)
+        //   .attr("width", tooltipWidth)
+        //   .attr("height", tooltipHeight)
+        // let txt = tooltip.append("text")
+        //   .attr("fill", "white")
+        //   .attr("text-anchor", "middle")
+        //   .attr("alignment-baseline", "hanging")
+        //   .attr("x", 0)
+        //   .attr("y", 2);
+        // let txt2 = tooltip.append("text")
+        //   .attr("fill", "white")
+        //   .attr("text-anchor", "middle")
+        //   .attr("alignment-baseline", "hanging")
+        //   .attr("x", 0)
+        //   .attr("y", 22);
 
-        //   map.transition().duration(1000).call(zoom.transform, newTransform);
-
-        // }
-
-        // // let tooltipWidth = 120;
-        // // let tooltipHeight = 40;
-
-        // // let tooltip = viewport.attr("class", "tooltip")
-        // //   .attr("visibility", "hidden");
-        // // tooltip.append("rect")
-        // //   .attr("fill", "black")
-        // //   .attr("opacity", 0.9)
-        // //   .attr("x", -tooltipWidth / 2.0)
-        // //   .attr("y", 0)
-        // //   .attr("width", tooltipWidth)
-        // //   .attr("height", tooltipHeight)
-        // // let txt = tooltip.append("text")
-        // //   .attr("fill", "white")
-        // //   .attr("text-anchor", "middle")
-        // //   .attr("alignment-baseline", "hanging")
-        // //   .attr("x", 0)
-        // //   .attr("y", 2);
-        // // let txt2 = tooltip.append("text")
-        // //   .attr("fill", "white")
-        // //   .attr("text-anchor", "middle")
-        // //   .attr("alignment-baseline", "hanging")
-        // //   .attr("x", 0)
-        // //   .attr("y", 22);
-
-        // circles.on("click", mouseClicked);
-        // function mouseClicked() {
-        //   // tooltip.style("visibility", "visible");
-        //   d3.select(this)
-        //     .transition().duration(200)
-        //     .attr("stroke-width", 0)
-        //     .attr("r", 5)
-        //     .attr("opacity", 0.4);
-        //   let company = d3.select(this);
-        //   console.log(this);
-        //   // find city for company
-        //   // find salary for company from levels.fyi
-        //   let city = d3.selectAll("circle.company");
-        // }
+        circles.on("click", mouseClicked);
+        function mouseClicked() {
+          // tooltip.style("visibility", "visible");
+          d3.select(this)
+            .transition().duration(200)
+            .attr("stroke-width", 0)
+            .attr("r", 5)
+            .attr("opacity", 0.4);
+          let company = d3.select(this);
+          console.log(this);
+          // find city for company
+          // find salary for company from levels.fyi
+          let city = d3.selectAll("circle.company");
+        }
       };
 
       requestData();
