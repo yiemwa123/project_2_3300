@@ -435,6 +435,8 @@
         let dy = bounds[1][1] - bounds[0][1];
         let x = (bounds[0][0] + bounds[1][0]) / 2;
         let y = (bounds[0][1] + bounds[1][1]) / 2;
+        circles.style("fill", "black");
+        tooltip.style("visibility", "hidden");
 
         let scale = Math.max(
           1,
@@ -450,6 +452,8 @@
       }
 
       viewport.selectAll(".state").on("click", clicked);
+
+  
 
 
 
