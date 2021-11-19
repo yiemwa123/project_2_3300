@@ -1,338 +1,385 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://d3js.org/topojson.v3.min.js"></script>
-    <title>Project 2 for INFO 3300</title>
-    <meta charset="UTF-8" />
-    <style>
-      .state {
-        fill: lightgrey;
-      }
 
-      .border {
-        stroke: black;
-        stroke-width: 1px;
-        fill: none;
-      }
-    </style>
-  </head>
+<head>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/topojson.v3.min.js"></script>
+  <title>Project 2 for INFO 3300</title>
+  <meta charset="UTF-8" />
+  <style>
+    .state {
+      fill: lightgrey;
+    }
 
-  <body>
-    <svg id="usmap" height="800" width="900"></svg>
-    <script>
-      const svg = d3.select("#usmap");
-      const width = svg.attr("width");
-      const height = svg.attr("height");
-      const margin = { top: 10, right: 10, bottom: 10, left: 10 };
-      const mapWidth = width - margin.left - margin.right;
-      const mapHeight = height - margin.top - margin.bottom;
-      const map = svg
-        .append("g")
-        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+    .border {
+      stroke: black;
+      stroke-width: 1px;
+      fill: none;
+    }
+  </style>
+</head>
 
-      const requestData = async function () {
-        const fortuneData = await d3.csv("./data/Fortune_1000.csv");
-        // console.log(fortuneData);
-        const costOfLiving = await d3.csv("./data/cost-of-living-2018.csv");
-        // console.log(costOfLiving);
-        const stateName = await d3.tsv("./data/us-state-names.tsv");
-        // console.log(stateName);
+<body>
+  <svg id="usmap" height="800" width="900"></svg>
+  <div id="buttoncont"></div>
+  <script>
+    const svg = d3.select("#usmap");
+    const width = svg.attr("width");
+    const height = svg.attr("height");
+    const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+    const mapWidth = width - margin.left - margin.right;
+    const mapHeight = height - margin.top - margin.bottom;
+    const map = svg
+      .append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-        // filtered the data by only returning the companies where the sector is listed as Technology
-        const filteredFD = fortuneData.filter((d) => {
-          return d.sector === "Technology";
-        });
 
-        // const filteredFD = fortuneData;
-        // console.log(filteredFD);
 
-        const levelsFyi = await d3.csv("./data/Levels_Fyi_Salary_Data.csv");
-        // console.log(levelsFyi);
+    const requestData = async function () {
 
-        const usMap = await d3.json("./data/us.json");
-        // console.log(usMap);
+      d3.select("#buttoncont").append("button")
+        .text("Zoom Out")
+        .on("click", zoomOut);
+      const fortuneData = await d3.csv("./data/Fortune_1000.csv");
+      // console.log(fortuneData);
+      const costOfLiving = await d3.csv("./data/cost-of-living-2018.csv");
+      // console.log(costOfLiving);
+      const stateName = await d3.tsv("./data/us-state-names.tsv");
+      // console.log(stateName);
 
-        const cities = await d3.json("./data/cities.json");
+      // filtered the data by only returning the companies where the sector is listed as Technology
+      const filteredFD = fortuneData.filter((d) => {
+        return d.sector === "Technology";
+      });
 
-        // state object stuff
-        var states = topojson.feature(usMap, usMap.objects.states);
-        // console.log(states);
+      // const filteredFD = fortuneData;
+      // console.log(filteredFD);
 
-        // console.log(stateName[0]);
-        states.features.forEach((d, i) => {
+      const levelsFyi = await d3.csv("./data/Levels_Fyi_Salary_Data.csv");
+      // console.log(levelsFyi);
 
-          // console.log(d.id);
-          // console.log(stateName[d.id]);
+      const usMap = await d3.json("./data/us.json");
+      // console.log(usMap);
 
-          d["abbrv"] = stateName[i].code;
-        });
+      const cities = await d3.json("./data/cities.json");
 
-        // console.log(states);
-        var statesMesh = topojson.mesh(usMap, usMap.objects.states);
-        var projection = d3
-          .geoAlbersUsa()
-          .fitSize([mapWidth, mapHeight], states);
-        var path = d3.geoPath().projection(projection);
-        let viewport = map.append("g");
+      // state object stuff
+      var states = topojson.feature(usMap, usMap.objects.states);
+      // console.log(states);
 
-        viewport
-          .selectAll(".state")
-          .data(states.features)
-          .enter()
-          .append("path")
-          .attr("class", "state")
-          .attr("d", path);
+      // console.log(stateName[0]);
+      states.features.forEach((d, i) => {
 
-        viewport
-          .append("path")
-          .datum(statesMesh)
-          .attr("class", "border")
-          .attr("d", path);
+        // console.log(d.id);
+        // console.log(stateName[d.id]);
 
-        // changing fortune 1000 dataset tox become a map with key: company name and value: all other attributes
-        var fortune = d3.index(filteredFD, (d) => d.company);
-        // console.log(fortune);
+        d["abbrv"] = stateName[i].code;
+      });
 
-        // filtering levelsFyi dataset to only contain companies that are in the fortune 1000 dataset and have the same city name
-        // this results in duplicates in the dataset -- entries will have the same company name and be in the same city, but each entry will be a different salary
-        let levelsFyiFiltered = levelsFyi.filter(function (d, i) {
-          d.citySplit = d.location.split(",");
-          let fortunekey = d.company;
-          let companyKey = fortune.get(fortunekey);
-          return fortune.has(fortunekey) && d.citySplit[0] === companyKey.city;
-        });
-        // console.log(levelsFyiFiltered);
+      // console.log(states);
+      var statesMesh = topojson.mesh(usMap, usMap.objects.states);
+      var projection = d3
+        .geoAlbersUsa()
+        .fitSize([mapWidth, mapHeight], states);
+      var path = d3.geoPath().projection(projection);
+      let viewport = map.append("g");
 
-        var salary_dict = {};
-        levelsFyiFiltered.forEach((b, i) => {
-          if (b.company in salary_dict) {
-            salary_dict[b.company]["salary"].push(b.totalyearlycompensation);
-          } else {
-            salary_dict[b.company] = {
-              state: b.citySplit[1].slice(1, 3),
-              salary: [b.totalyearlycompensation],
-            };
-          }
-        });
-        // console.log(salary_dict);
+      viewport
+        .selectAll(".state")
+        .data(states.features)
+        .enter()
+        .append("path")
+        .attr("class", "state")
+        .attr("d", path);
 
-        var state_dict = {};
-        var company_total = 0;
+      viewport
+        .append("path")
+        .datum(statesMesh)
+        .attr("class", "border")
+        .attr("d", path);
 
-        for ([key, val] of Object.entries(salary_dict)) {
-          if (val.state in state_dict) {
-            state_dict[val.state]++;
-            company_total++;
-          } else {
-            state_dict[val.state] = 1;
-            company_total++;
-          }
+      // changing fortune 1000 dataset tox become a map with key: company name and value: all other attributes
+      var fortune = d3.index(filteredFD, (d) => d.company);
+      // console.log(fortune);
+
+      // filtering levelsFyi dataset to only contain companies that are in the fortune 1000 dataset and have the same city name
+      // this results in duplicates in the dataset -- entries will have the same company name and be in the same city, but each entry will be a different salary
+      let levelsFyiFiltered = levelsFyi.filter(function (d, i) {
+        d.citySplit = d.location.split(",");
+        let fortunekey = d.company;
+        let companyKey = fortune.get(fortunekey);
+        return fortune.has(fortunekey) && d.citySplit[0] === companyKey.city;
+      });
+      // console.log(levelsFyiFiltered);
+
+      var salary_dict = {};
+      levelsFyiFiltered.forEach((b, i) => {
+        if (b.company in salary_dict) {
+          salary_dict[b.company]["salary"].push(b.totalyearlycompensation);
+        } else {
+          salary_dict[b.company] = {
+            state: b.citySplit[1].slice(1, 3),
+            salary: [b.totalyearlycompensation],
+          };
         }
-        console.log(state_dict);
-        // we hard coded extent to make the range of colors smoother and more informative
-        const minMax = d3.extent([0, 5]);
+      });
+      // console.log(salary_dict);
 
-        // BEST ONE FOR NOW
-        const colorScale = d3.scaleSequential(minMax, d3.interpolateSpectral);
+      var state_dict = {};
+      var company_total = 0;
 
-        map
-          .selectAll(".state")
-          .style("fill", (d) => colorScale(state_dict[d.abbrv]));
-        // console.log(state_dict);
+      for ([key, val] of Object.entries(salary_dict)) {
+        if (val.state in state_dict) {
+          state_dict[val.state]++;
+          company_total++;
+        } else {
+          state_dict[val.state] = 1;
+          company_total++;
+        }
+      }
+      console.log(state_dict);
+      // we hard coded extent to make the range of colors smoother and more informative
+      const minMax = d3.extent([0, 5]);
 
-        // getting unique cities from levelsFyi data
-        let duplicateCities = [];
-        fortune.forEach((d) => {
-          duplicateCities.push(d.city);
+      // BEST ONE FOR NOW
+      const colorScale = d3.scaleSequential(minMax, d3.interpolateSpectral);
+
+      map
+        .selectAll(".state")
+        .style("fill", (d) => colorScale(state_dict[d.abbrv]));
+      // console.log(state_dict);
+
+      // getting unique cities from levelsFyi data
+      let duplicateCities = [];
+      fortune.forEach((d) => {
+        duplicateCities.push(d.city);
+      });
+
+      let uniqueCities = duplicateCities.filter(
+        (city, i, ar) => ar.indexOf(city) === i
+      );
+      // console.log(duplicateCities);
+      // console.log(uniqueCities);
+
+      // make the cities data a map with key: city, value: lat/long
+      var filteredCities = cities.filter(function (d) {
+        return uniqueCities.includes(d.city);
+      });
+      // console.log(filteredCities); // not all cities in the company dataset are included in the lat/long dataset
+
+      // get the latitude and longitude positions for the city locations of companies
+      filteredCities.forEach((d) => {
+        d.Position = projection([d.longitude, d.latitude]);
+        // console.log(d.Position);
+      });
+
+      // changing city name format to just the name of the city
+      costOfLiving.forEach((d, i) => {
+        d["City"] = d["City"].substring(0, d["City"].indexOf(","));
+      });
+
+      // making totalyearly compensation and salary ints
+      levelsFyiFiltered.forEach((d, i) => {
+        d["basesalary"] = parseInt(d["basesalary"]);
+        d["totalyearlycompensation"] = parseInt(d["totalyearlycompensation"]);
+      });
+
+      // Created cost of living index column for that city
+      filteredCities.forEach((d, i) => {
+        costOfLiving.forEach((b, i) => {
+          if (b["City"] === d["city"]) {
+            d["COL"] = b["Cost of Living Index"];
+          }
         });
+      });
 
-        let uniqueCities = duplicateCities.filter(
-          (city, i, ar) => ar.indexOf(city) === i
-        );
-        // console.log(duplicateCities);
-        // console.log(uniqueCities);
-
-        // make the cities data a map with key: city, value: lat/long
-        var filteredCities = cities.filter(function (d) {
-          return uniqueCities.includes(d.city);
-        });
-        // console.log(filteredCities); // not all cities in the company dataset are included in the lat/long dataset
-
-        // get the latitude and longitude positions for the city locations of companies
-        filteredCities.forEach((d) => {
-          d.Position = projection([d.longitude, d.latitude]);
-          // console.log(d.Position);
-        });
-
-        // changing city name format to just the name of the city
-        costOfLiving.forEach((d, i) => {
-          d["City"] = d["City"].substring(0, d["City"].indexOf(","));
-        });
-
-        // making totalyearly compensation and salary ints
+      // Average total yearly compensation for each company
+      let avgSalaries = [];
+      let counts = {};
+      let companiesAndSalary = {};
+      levelsFyiFiltered.forEach((b, i) => {
+        let tempCompany = b["company"];
+        if (!counts[tempCompany]) {
+          counts[tempCompany] = 0;
+          avgSalaries[tempCompany] = 0;
+        }
+        counts[tempCompany] = counts[tempCompany] + 1;
+        avgSalaries[tempCompany] =
+          avgSalaries[tempCompany] + b["totalyearlycompensation"];
+      });
+      Object.keys(avgSalaries).map(function (key, index) {
+        avgSalaries[key] = Math.round(avgSalaries[key] / counts[key]);
+      });
+      // created companies column that contains array of all companies located in that city
+      var companies = {};
+      filteredCities.forEach((b, i) => {
         levelsFyiFiltered.forEach((d, i) => {
-          d["basesalary"] = parseInt(d["basesalary"]);
-          d["totalyearlycompensation"] = parseInt(d["totalyearlycompensation"]);
-        });
-
-        // Created cost of living index column for that city
-        filteredCities.forEach((d, i) => {
-          costOfLiving.forEach((b, i) => {
-            if (b["City"] === d["city"]) {
-              d["COL"] = b["Cost of Living Index"];
-            }
-          });
-        });
-
-        // Average total yearly compensation for each company
-        let avgSalaries = [];
-        let counts = {};
-        let companiesAndSalary = {};
-        levelsFyiFiltered.forEach((b, i) => {
-          let tempCompany = b["company"];
-          if (!counts[tempCompany]) {
-            counts[tempCompany] = 0;
-            avgSalaries[tempCompany] = 0;
+          let temp = d["citySplit"];
+          if (temp[0] === b.city && !(b.city in companies)) {
+            companies[d["company"]] = avgSalaries[d["company"]];
           }
-          counts[tempCompany] = counts[tempCompany] + 1;
-          avgSalaries[tempCompany] =
-            avgSalaries[tempCompany] + b["totalyearlycompensation"];
         });
-        Object.keys(avgSalaries).map(function (key, index) {
-          avgSalaries[key] = Math.round(avgSalaries[key] / counts[key]);
-        });
-        // created companies column that contains array of all companies located in that city
-        var companies = {};
-        filteredCities.forEach((b, i) => {
-          levelsFyiFiltered.forEach((d, i) => {
-            let temp = d["citySplit"];
-            if (temp[0] === b.city && !(b.city in companies)) {
-              companies[d["company"]] = avgSalaries[d["company"]];
-            }
-          });
-          b.companies = companies;
-          companies = {};
-        });
+        b.companies = companies;
+        companies = {};
+      });
 
-        // filtered out cities without companies
-        var filteredNewCities = filteredCities.filter(function (d) {
-          return Object.keys(d.companies).length !== 0;
-        });
-        // console.log(filteredNewCities);
+      // filtered out cities without companies
+      var filteredNewCities = filteredCities.filter(function (d) {
+        return Object.keys(d.companies).length !== 0;
+      });
+      // console.log(filteredNewCities);
 
-        // // plot the cities with longitude and latitude and add companies to them
-        var circles = viewport
+      // // plot the cities with longitude and latitude and add companies to them
+      var circles = viewport
+        .selectAll("circle.company")
+        .data(filteredNewCities)
+        .join("circle")
+        .attr("class", "company")
+        .attr("cx", (d) => d.Position[0])
+        .attr("cy", (d) => d.Position[1])
+        .style("fill", "black")
+        .attr("r", 5);
+
+      // var cityLabel = viewport.selectAll("text.cityname").data(filteredCities).join("text").style("font-size", "12px" ).text(d => d.city).attr('x', d => d.Position[0] + 5)
+      //   .attr('y', d => d.Position[1] + 5).attr("class", "cityname");
+
+      let stateClick = viewport.selectAll(".state");
+
+      var zoom = d3.zoom().scaleExtent([1, 10]).on("zoom", mapZoomed);
+
+
+      let tooltipWidth = 200;
+      let tooltipHeight = 150;
+      let tooltip = svg
+        .append("g")
+        .attr("class", "tooltip")
+        .attr("visibility", "hidden");
+
+      var circle;
+
+      tooltip
+        .append("rect")
+        .attr("class", "labelThing")
+        .attr("fill", "black")
+        .attr("opacity", 0.9)
+        .attr("width", tooltipWidth)
+        .attr("height", tooltipHeight)
+        .attr("x", 0)
+        .attr("y", 0);
+      let txt = tooltip
+        .append("text")
+        .attr("fill", "white")
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "hanging")
+        .attr("x", 650)
+        .attr("y", 70);
+      let txt2 = tooltip
+        .append("text")
+        .attr("fill", "white")
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "hanging")
+        .attr("x", 650)
+        .attr("y", 90);
+
+      function mapZoomed({ transform }) {
+        viewport.attr("transform", transform.toString());
+
+        viewport.select(".border").style("stroke-width", 2 / transform.k);
+
+        viewport
           .selectAll("circle.company")
-          .data(filteredNewCities)
-          .join("circle")
-          .attr("class", "company")
-          .attr("cx", (d) => d.Position[0])
-          .attr("cy", (d) => d.Position[1])
-          .style("fill", "black")
-          .attr("r", 5);
+          .attr("r", transform.k >= 2 ? 6 / transform.k : 4);
 
-        // var cityLabel = viewport.selectAll("text.cityname").data(filteredCities).join("text").style("font-size", "12px" ).text(d => d.city).attr('x', d => d.Position[0] + 5)
-        //   .attr('y', d => d.Position[1] + 5).attr("class", "cityname");
 
-        let stateClick = viewport.selectAll(".state");
+        var x_loc = d3.select(".labelThing").attr("x")
 
-        var zoom = d3.zoom().scaleExtent([1, 10]).on("zoom", mapZoomed);
+        var y_loc = d3.select(".labelThing").attr("y")
 
-        map.call(zoom);
-        map.call(zoom.transform, d3.zoomIdentity);
 
-        function mapZoomed({ transform }) {
-          viewport.attr("transform", transform.toString());
 
-          viewport.select(".border").style("stroke-width", 2 / transform.k);
+        d3.select(".labelThing").attr("x", transform.k > 1 ? (x_loc - transform.x) / transform.k : 0)
+          .attr("y", transform.k > 1 ? (y_loc - transform.y) / transform.k : 0);
 
-          viewport
-            .selectAll("circle.company")
-            .attr("r", transform.k >= 2 ? 6 / transform.k : 4);
 
-          // viewport.selectAll("text.cityname").data(filteredNewCities).join("text").style("font-size", (transform.k > 3) ? "1px" : "0px").text(d => d.city).attr('x', d => (Number(d.rank)%2===0) ? d.Position[0] - 3 : d.Position[0] + 3)
-          //   .attr('y', d => d.Position[1]-1).attr("class", "cityname");
-        }
 
-        // console.log(filteredCities)
 
-        function clicked(event, d) {
-          // console.log(d);
 
-          let bounds = path.bounds(d.geometry);
-          // console.log(bounds);
-          let dx = bounds[1][0] - bounds[0][0];
-          let dy = bounds[1][1] - bounds[0][1];
-          let x = (bounds[0][0] + bounds[1][0]) / 2;
-          let y = (bounds[0][1] + bounds[1][1]) / 2;
 
-          let scale = Math.max(
-            1,
-            Math.min(10, 0.9 / Math.max(dx / mapWidth, dy / mapHeight))
-          );
-          let translate = [mapWidth / 2 - x * scale, mapHeight / 2 - y * scale];
 
-          let newTransform = d3.zoomIdentity
-            .translate(translate[0], translate[1])
-            .scale(scale);
 
-          map.transition().duration(1000).call(zoom.transform, newTransform);
-        }
+        // viewport.selectAll("text.cityname").data(filteredNewCities).join("text").style("font-size", (transform.k > 3) ? "1px" : "0px").text(d => d.city).attr('x', d => (Number(d.rank)%2===0) ? d.Position[0] - 3 : d.Position[0] + 3)
+        //   .attr('y', d => d.Position[1]-1).attr("class", "cityname");
+      }
 
-        viewport.selectAll(".state").on("click", clicked);
+      map.call(zoom);
+      map.call(zoom.transform, d3.zoomIdentity);
 
-        let tooltipWidth = 200;
-        let tooltipHeight = 150;
-        let tooltip = svg
-          .append("g")
-          .attr("class", "tooltip")
-          .attr("visibility", "hidden");
+      // console.log(filteredCities)
 
-        tooltip
-          .append("rect")
-          .attr("fill", "black")
-          .attr("opacity", 0.9)
-          .attr("x", 570)
-          .attr("y", 25)
-          .attr("width", tooltipWidth)
-          .attr("height", tooltipHeight);
-        let txt = tooltip
-          .append("text")
-          .attr("fill", "white")
-          .attr("text-anchor", "middle")
-          .attr("alignment-baseline", "hanging")
-          .attr("x", 650)
-          .attr("y", 70);
-        let txt2 = tooltip
-          .append("text")
-          .attr("fill", "white")
-          .attr("text-anchor", "middle")
-          .attr("alignment-baseline", "hanging")
-          .attr("x", 650)
-          .attr("y", 90);
+      function clicked(event, d) {
+        // console.log(d);
 
-        circles.on("click", mouseClicked);
-        function mouseClicked() {
-          tooltip.style("visibility", "visible");
-          let circle = d3.select(this);
-          // salaries and companies
-          let circleCompanies = circle.datum().companies;
-          // find city for company
-          let circleCities = circle.datum().city;
-          // console.log(circleCities);
-          // find cost of living
-          let circleCoL = circle.datum().COL;
-          console.log(circleCoL);
+        let bounds = path.bounds(d.geometry);
+        // console.log(bounds);
+        let dx = bounds[1][0] - bounds[0][0];
+        let dy = bounds[1][1] - bounds[0][1];
+        let x = (bounds[0][0] + bounds[1][0]) / 2;
+        let y = (bounds[0][1] + bounds[1][1]) / 2;
 
-          txt.text(JSON.stringify(circleCompanies));
-          txt2.text(circleCoL);
-        }
+        let scale = Math.max(
+          1,
+          Math.min(10, 0.9 / Math.max(dx / mapWidth, dy / mapHeight))
+        );
+        let translate = [mapWidth / 2 - x * scale, mapHeight / 2 - y * scale];
 
-        // console.log(states);
+        let newTransform = d3.zoomIdentity
+          .translate(translate[0], translate[1])
+          .scale(scale);
+
+        map.transition().duration(1000).call(zoom.transform, newTransform);
+      }
+
+      viewport.selectAll(".state").on("click", clicked);
+
+
+      circles.on("click", mouseClicked);
+
+
+      function zoomOut() {
+
+        map.transition().duration(1000).call(zoom.transform, d3.zoomIdentity);
       };
 
-      requestData();
-    </script>
-  </body>
+
+
+      function mouseClicked() {
+        tooltip.style("visibility", "visible");
+        circle = d3.select(this).datum();
+        // salaries and companies
+        let circleCompanies = circle.companies;
+        // find city for company
+        let circleCities = circle.city;
+        // console.log(circleCities);
+        // find cost of living
+        let circleCoL = circle.COL;
+        console.log(circleCoL);
+
+        txt.text(JSON.stringify(circleCompanies));
+        txt2.text(circleCoL);
+
+        d3.select(".labelThing").attr("x", circle.Position[0] + 5)
+          .attr("y", circle.Position[1] + 20)
+
+
+        console.log(d3.select(this));
+
+      }
+
+      // console.log(states);
+    };
+
+    requestData();
+  </script>
+</body>
+
 </html>
