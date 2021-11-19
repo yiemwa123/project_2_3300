@@ -43,6 +43,8 @@
         const filteredFD = fortuneData.filter((d) => {
           return d.sector === "Technology";
         });
+
+        // const filteredFD = fortuneData;
         // console.log(filteredFD);
 
         const levelsFyi = await d3.csv("./data/Levels_Fyi_Salary_Data.csv");
@@ -57,15 +59,16 @@
         var states = topojson.feature(usMap, usMap.objects.states);
         // console.log(states);
 
-        console.log(stateName[0]);
+        // console.log(stateName[0]);
         states.features.forEach((d, i) => {
-          console.log(d.id);
-          // console.log(stateName[d.id].code);
-          // console.log(stateName[d.id].code);
-          // d["abbrv"] = stateName[d.id].code;
+
+          // console.log(d.id);
+          // console.log(stateName[d.id]);
+
+          d["abbrv"] = stateName[i].code;
         });
 
-        console.log(states);
+        // console.log(states);
         var statesMesh = topojson.mesh(usMap, usMap.objects.states);
         var projection = d3
           .geoAlbersUsa()
@@ -126,21 +129,17 @@
             company_total++;
           }
         }
-
-        const minMax = d3.extent([0, company_total]);
-
-        // copied Lecture color scale from state visited lecture
-        const colorScale = d3
-          .scaleQuantile()
-          .domain(minMax)
-          .range(["#fff", "#d1e8ed", "#adc2da", "#8879b3", "#762b80"]);
-
-        // map.selectAll(".state").style(
-        //   "fill",
-        //   (d) => console.log(d)
-        //   // colorScale(state_dict[d.id])
-        // );
         console.log(state_dict);
+        // we hard coded extent to make the range of colors smoother and more informative
+        const minMax = d3.extent([0, 5]);
+
+        // BEST ONE FOR NOW
+        const colorScale = d3.scaleSequential(minMax, d3.interpolateSpectral);
+
+        map
+          .selectAll(".state")
+          .style("fill", (d) => colorScale(state_dict[d.abbrv]));
+        // console.log(state_dict);
 
         // getting unique cities from levelsFyi data
         let duplicateCities = [];
