@@ -256,10 +256,11 @@
       tooltip.append("rect")
         .attr("fill", "black")
         .attr("opacity", 0.9)
-        .attr("x", -tooltipWidth / 2.0)
-        .attr("y", 0)
         .attr("width", tooltipWidth)
         .attr("height", tooltipHeight)
+        .attr("x", 100)
+        .attr("y", 100);
+
       let txt = tooltip.append("text")
         .attr("fill", "white")
         .attr("text-anchor", "middle")
@@ -274,10 +275,19 @@
         .attr("y", 22);
 
 
+      let stateClick = viewport.selectAll(".state");
+
+
       circles.on("click", mouseClicked);
+      // svg.on("click", clearStuff);
+
       function mouseClicked() {
-        tooltip.style("visibility", "visible");
+
         let circle = d3.select(this);
+
+        console.log(circle);
+
+
         // salaries and companies
         let circleCompanies = circle.datum().companies;
         // find city for company
@@ -286,8 +296,20 @@
         let circleCoL = circle.datum().COL;
         console.log(circleCoL);
 
+        tooltip.style("visibility", "visible")
+
+        // d3.select("rect.info").attr("x", circle.Position[0] - 5)
+        //   .attr("y", Position[1] + 5);
+
 
       }
+
+      // function clearStuff() {
+
+      //   tooltip.style("visibility", "hidden")
+
+
+      // }
 
       console.log(states);
 
