@@ -183,8 +183,7 @@
         .attr('cx', d => d.Position[0])
         .attr('cy', d => d.Position[1])
         .style("fill", 'black')
-        .attr('r', 5)
-        .attr('company', d => d['company']);
+        .attr('r', 5);
 
 
       // var cityLabel = viewport.selectAll("text.cityname").data(filteredCities).join("text").style("font-size", "12px" ).text(d => d.city).attr('x', d => d.Position[0] + 5)
@@ -217,7 +216,7 @@
           .attr('r', transform.k >= 2 ? 6 / transform.k : 4);
 
         viewport.selectAll("text.cityname").data(filteredCities).join("text").style("font-size", (transform.k > 3) ? "2px" : "0px").text(d => d.city).attr('x', d => d.Position[0] + 3)
-          .attr('y', d => d.Position[1]-1).attr("class", "cityname");
+          .attr('y', d => d.Position[1] - 1).attr("class", "cityname");
 
       }
 
@@ -229,7 +228,7 @@
 
       function clicked(event, d) {
 
-        console.log(d);
+        // console.log(d);
 
         let bounds = path.bounds(d.geometry);
         console.log(bounds);
@@ -251,39 +250,45 @@
       }
 
 
-main
-      // let tooltip = viewport.attr("class", "tooltip")
-      //   .attr("visibility", "hidden");
+      let tooltipWidth = 120;
+      let tooltipHeight = 40;
+      let tooltip = svg.append('g').attr("class", "tooltip")
+        .attr("visibility", "hidden");
 
-      // tooltip.append("rect")
-      //   .attr("fill", "black")
-      //   .attr("opacity", 0.9)
-      //   .attr("x", -tooltipWidth / 2.0)
-      //   .attr("y", 0)
-      //   .attr("width", tooltipWidth)
-      //   .attr("height", tooltipHeight)
-      // let txt = tooltip.append("text")
-      //   .attr("fill", "white")
-      //   .attr("text-anchor", "middle")
-      //   .attr("alignment-baseline", "hanging")
-      //   .attr("x", 0)
-      //   .attr("y", 2);
-      // let txt2 = tooltip.append("text")
-      //   .attr("fill", "white")
-      //   .attr("text-anchor", "middle")
-      //   .attr("alignment-baseline", "hanging")
-      //   .attr("x", 0)
-      //   .attr("y", 22);
+      tooltip.append("rect")
+        .attr("fill", "black")
+        .attr("opacity", 0.9)
+        .attr("x", -tooltipWidth / 2.0)
+        .attr("y", 0)
+        .attr("width", tooltipWidth)
+        .attr("height", tooltipHeight)
+      let txt = tooltip.append("text")
+        .attr("fill", "white")
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "hanging")
+        .attr("x", 0)
+        .attr("y", 2);
+      let txt2 = tooltip.append("text")
+        .attr("fill", "white")
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "hanging")
+        .attr("x", 0)
+        .attr("y", 22);
 
 
       circles.on("click", mouseClicked);
       function mouseClicked() {
-        // tooltip.style("visibility", "visible");
-        let company = d3.select(this.company);
-        console.log(company)
+        tooltip.style("visibility", "visible");
+        let circle = d3.select(this);
+        // salaries and companies
+        let circleCompanies = circle.datum().companies;
         // find city for company
-        // find salary for company from levels.fyi 
+        let circleCities = circle.datum().city;
         // find cost of living 
+        let circleCoL = circle.datum().COL;
+        console.log(circleCoL);
+
+
       }
 
       console.log(states);
