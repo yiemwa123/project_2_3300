@@ -328,6 +328,7 @@
         .attr("cx", (d) => d.Position[0])
         .attr("cy", (d) => d.Position[1])
         .style("fill", "black")
+        .style("stroke", "pink")
         .attr("r", 5);
 
       // var cityLabel = viewport.selectAll("text.cityname").data(filteredCities).join("text").style("font-size", "12px" ).text(d => d.city).attr('x', d => d.Position[0] + 5)
@@ -379,7 +380,8 @@
 
         viewport
           .selectAll("circle.company")
-          .attr("r", transform.k >= 2 ? 6 / transform.k : 4);
+          .attr("r", transform.k >= 2 ? 6 / transform.k : 4)
+          .style("stroke-width", transform.k >= 1 ? 2 / transform.k : 0.5);
 
 
         var x_loc = d3.select(".labelThing").attr("x")
