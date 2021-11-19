@@ -129,22 +129,21 @@
 
       })
       // Average salary and company 
-      let count = 0;
-      let sum = 0;
-      let salaries = {};
-      fortune.forEach((d, i) => {
-        levelsFyiFiltered.forEach((b, i) => {
-          if (b['company'] === d['company']) {
-            count = count + 1;
-            sum = sum + b['totalyearlycompensation'];
-          };
-        })
-        let avgSalary = sum / count;
-        d['avgSalary'] = avgSalary;
-        count = 0;
-        sum = 0;
-      })
-      console.log(fortune);
+      // let count = 0;
+      // let sum = 0;
+      // let salaries = {};
+      // fortune.forEach((d, i) => {
+      //   levelsFyiFiltered.forEach((b, i) => {
+      //     if (b['company'] === d['company']) {
+      //       count = count + 1;
+      //       sum = sum + b['totalyearlycompensation'];
+      //     };
+      //   })
+      //   let avgSalary = sum / count;
+      //   d['avgSalary'] = avgSalary;
+      //   count = 0;
+      //   sum = 0;
+      // })
       // Cost of living in city 
       // let filteredCitiesCompaniesSalaries = filteredCitiesandCompanies.forEach((d, i) => {
 
@@ -241,16 +240,11 @@
       circles.on("click", mouseClicked);
       function mouseClicked() {
         // tooltip.style("visibility", "visible");
-        d3.select(this)
-          .transition().duration(200)
-          .attr("stroke-width", 0)
-          .attr("r", 5)
-          .attr("opacity", 0.4);
         let company = d3.select(this);
         console.log(this);
         // find city for company
         // find salary for company from levels.fyi 
-        let city = d3.selectAll("circle.company");
+        // find cost of living 
       }
 
     }
