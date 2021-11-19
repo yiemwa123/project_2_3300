@@ -84,7 +84,7 @@
         d.citySplit = d.location.split(",");
         let fortunekey = d.company;
         let companyKey = fortune.get(fortunekey);
-        return ((fortune.has(fortunekey)) && (d.citySplit[0] === companyKey.city) )
+        return ((fortune.has(fortunekey))  )
       });
       console.log(levelsFyiFiltered); 
 
@@ -106,10 +106,47 @@
       console.log(filteredCities); // not all cities in the company dataset are included in the lat/long dataset
 
 
+      // adding cities that don't have longitude and latitude
+      let allCities = [];
+      filteredCities.forEach( (d,i) => {
+        allCities.push(d.city);
+      })
+      console.log(allCities);
+
+      var missingCities = [];
+      uniqueCities.forEach( (d,i) => {
+        if (!allCities.includes(d)) {
+          missingCities.push(d);
+        }
+      })
+      console.log(missingCities);
+
+      
+      missingCities.forEach(d => {
+        //filteredCities.d = d;
+      })
+      console.log(filteredCities);
+
       // get the latitude and longitutde positions for the city locations of companies
-      filteredCities.forEach( d => {
-        d.Position = projection( [d.longitude, d.latitude] );
-        console.log(d.Position);
+      filteredCities.forEach(d => {
+        d.Position = projection([d.longitude, d.latitude]);
+        // console.log(d.Position);
+      })
+      
+      var companies = new Array();
+      var newDict = {};
+      // created new column companies that contains array of all companies located in that city
+      filteredCities.forEach((b, i) => {
+        fortune.forEach((d, i) => {
+          if (d.city === b['city']) {
+            companies.push(d['company']);
+          }
+        })
+        newDict[b['city']] = companies;
+        b.cityAndSalary = newDict;
+        newDict = {};
+        companies = [];
+
       })
 
       // plot the cities with longitude and latitude
