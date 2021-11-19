@@ -166,19 +166,22 @@
       })
       console.log(filteredCities);
 
-
-
+      // filtered out cities without companies
+      var filteredNewCities = filteredCities.filter(function (d) {
+        return Object.keys(d.companies).length !== 0;
+      })
+      console.log(filteredNewCities);
 
       // // plot the cities with longitude and latitude and add companies to them
       var circles = viewport.selectAll("circle.company")
-        .data(filteredCities)
+        .data(filteredNewCities)
         .join("circle")
         .attr("class", "company")
         .attr('cx', d => d.Position[0])
         .attr('cy', d => d.Position[1])
         .style("fill", 'black')
         .attr('r', 5)
-        .attr('company', 'hello');
+        .attr('company', d => d['company']);
 
 
 
@@ -232,11 +235,11 @@
 
       }
 
-      // let tooltipWidth = 120;
-      // let tooltipHeight = 40;
-
+      let tooltipWidth = 120;
+      let tooltipHeight = 40;
       // let tooltip = viewport.attr("class", "tooltip")
       //   .attr("visibility", "hidden");
+
       // tooltip.append("rect")
       //   .attr("fill", "black")
       //   .attr("opacity", 0.9)
@@ -261,8 +264,8 @@
       circles.on("click", mouseClicked);
       function mouseClicked() {
         // tooltip.style("visibility", "visible");
-        let company = d3.select(this);
-        console.log(this);
+        let company = d3.select(this.company);
+        console.log(company)
         // find city for company
         // find salary for company from levels.fyi 
         // find cost of living 
