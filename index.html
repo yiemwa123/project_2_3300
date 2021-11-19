@@ -51,6 +51,9 @@
 
         const cities = await d3.json("./data/cities.json");
 
+        const stateNames = await d3.tsv("./data/us-state-names.tsv");
+        // console.log(stateNames);
+
         // state object stuff
         var states = topojson.feature(usMap, usMap.objects.states);
 
@@ -68,13 +71,14 @@
           .append("path")
           .attr("class", "state")
           .attr("d", path);
-
         viewport
           .append("path")
           .datum(statesMesh)
           .attr("class", "border")
           .attr("d", path);
 
+        // states.append("state", "hi");
+        // console.log(states);
         // changing fortune 1000 dataset tox become a map with key: company name and value: all other attributes
         var fortune = d3.index(filteredFD, (d) => d.company);
         // console.log(fortune);
