@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://d3js.org/topojson.v3.min.js"></script>
@@ -9,6 +10,7 @@
     .state {
       fill: lightgrey;
     }
+
     .border {
       stroke: black;
       stroke-width: 1px;
@@ -180,228 +182,151 @@
             companies[d['company']] = avgSalaries[d['company']]
           }
         });
-        // console.log(salary_dict);
+        b.companies = companies;
+        companies = {};
 
-        var state_dict = {};
-        var company_total = 0;
+      })
 
-        for ([key, val] of Object.entries(salary_dict)) {
-          if (val.state in state_dict) {
-            state_dict[val.state]++;
-            company_total++;
-          } else {
-            state_dict[val.state] = 1;
-            company_total++;
-          }
-        }
+      // filtered out cities without companies
+      var filteredNewCities = filteredCities.filter(function (d) {
+        return Object.keys(d.companies).length !== 0;
+      })
+      console.log(filteredNewCities);
 
-        const minMax = d3.extent([0, company_total]);
+      // // plot the cities with longitude and latitude and add companies to them
+      var circles = viewport.selectAll("circle.company")
+        .data(filteredNewCities)
+        .join("circle")
+        .attr("class", "company")
+        .attr('cx', d => d.Position[0])
+        .attr('cy', d => d.Position[1])
+        .style("fill", 'black')
+        .attr('r', 5);
 
-        // copied Lecture color scale from state visited lecture
-        const colorScale = d3
-          .scaleQuantile()
-          .domain(minMax)
-          .range(["#fff", "#d1e8ed", "#adc2da", "#8879b3", "#762b80"]);
 
-        map.selectAll(".state").style(
-          "fill",
-          (d) => console.log(d)
-          // colorScale(state_dict[d.id])
-        );
-        console.log(state_dict);
+      // var cityLabel = viewport.selectAll("text.cityname").data(filteredCities).join("text").style("font-size", "12px" ).text(d => d.city).attr('x', d => d.Position[0] + 5)
+      //   .attr('y', d => d.Position[1] + 5).attr("class", "cityname");
 
-        // getting unique cities from levelsFyi data
-        let duplicateCities = [];
-        fortune.forEach((d) => {
-          duplicateCities.push(d.city);
-        });
 
-        let uniqueCities = duplicateCities.filter(
-          (city, i, ar) => ar.indexOf(city) === i
-        );
-        // console.log(duplicateCities);
-        // console.log(uniqueCities);
 
-        // make the cities data a map with key: city, value: lat/long
-        var filteredCities = cities.filter(function (d) {
-          return uniqueCities.includes(d.city);
-        });
-        // console.log(filteredCities); // not all cities in the company dataset are included in the lat/long dataset
+      var zoom = d3.zoom()
+        .scaleExtent([1, 10])
+        .on("zoom", mapZoomed);
 
-        // get the latitude and longitude positions for the city locations of companies
-        filteredCities.forEach((d) => {
-          d.Position = projection([d.longitude, d.latitude]);
-          // console.log(d.Position);
-        });
+      map.call(zoom);
 
-        // changing city name format to just the name of the city
-        costOfLiving.forEach((d, i) => {
-          d["City"] = d["City"].substring(0, d["City"].indexOf(","));
-        });
+      map.call(zoom.transform, d3.zoomIdentity);
 
-        // making totalyearly compensation and salary ints
-        levelsFyiFiltered.forEach((d, i) => {
-          d["basesalary"] = parseInt(d["basesalary"]);
-          d["totalyearlycompensation"] = parseInt(d["totalyearlycompensation"]);
-        });
 
-        // Created cost of living index column for that city
-        filteredCities.forEach((d, i) => {
-          costOfLiving.forEach((b, i) => {
-            if (b["City"] === d["city"]) {
-              d["COL"] = b["Cost of Living Index"];
-            }
-          });
-        });
+      viewport.selectAll(".state").on("click", clicked);
 
-        // Average total yearly compensation for each company
-        let avgSalaries = [];
-        let counts = {};
-        let companiesAndSalary = {};
-        levelsFyiFiltered.forEach((b, i) => {
-          let tempCompany = b["company"];
-          if (!counts[tempCompany]) {
-            counts[tempCompany] = 0;
-            avgSalaries[tempCompany] = 0;
-          }
-          counts[tempCompany] = counts[tempCompany] + 1;
-          avgSalaries[tempCompany] =
-            avgSalaries[tempCompany] + b["totalyearlycompensation"];
-        });
-        Object.keys(avgSalaries).map(function (key, index) {
-          avgSalaries[key] = Math.round(avgSalaries[key] / counts[key]);
-        });
-        // created companies column that contains array of all companies located in that city
-        var companies = {};
-        filteredCities.forEach((b, i) => {
-          levelsFyiFiltered.forEach((d, i) => {
-            let temp = d["citySplit"];
-            if (temp[0] === b.city && !(b.city in companies)) {
-              companies[d["company"]] = avgSalaries[d["company"]];
-            }
-          });
-          b.companies = companies;
-          companies = {};
-        });
 
-        // filtered out cities without companies
-        var filteredNewCities = filteredCities.filter(function (d) {
-          return Object.keys(d.companies).length !== 0;
-        });
-        // console.log(filteredNewCities);
 
-        // // plot the cities with longitude and latitude and add companies to them
-        var circles = viewport
-          .selectAll("circle.company")
-          .data(filteredNewCities)
-          .join("circle")
-          .attr("class", "company")
-          .attr("cx", (d) => d.Position[0])
-          .attr("cy", (d) => d.Position[1])
-          .style("fill", "black")
-          .attr("r", 5);
+      function mapZoomed({ transform }) {
 
-        // var cityLabel = viewport.selectAll("text.cityname").data(filteredCities).join("text").style("font-size", "12px" ).text(d => d.city).attr('x', d => d.Position[0] + 5)
-        //   .attr('y', d => d.Position[1] + 5).attr("class", "cityname");
 
-        let stateClick = viewport.selectAll(".state");
+        viewport.attr("transform", transform.toString());
 
-        var zoom = d3.zoom().scaleExtent([1, 10]).on("zoom", mapZoomed);
+        viewport.select(".border")
+          .style("stroke-width", 2 / transform.k);
 
-        map.call(zoom);
-        map.call(zoom.transform, d3.zoomIdentity);
+        viewport.selectAll("circle.company")
+          .attr('r', transform.k >= 2 ? 6 / transform.k : 4);
 
-        function mapZoomed({ transform }) {
-          viewport.attr("transform", transform.toString());
 
-          viewport.select(".border").style("stroke-width", 2 / transform.k);
+        // viewport.selectAll("text.cityname").data(filteredNewCities).join("text").style("font-size", (transform.k > 3) ? "1px" : "0px").text(d => d.city).attr('x', d => (Number(d.rank)%2===0) ? d.Position[0] - 3 : d.Position[0] + 3)
+        //   .attr('y', d => d.Position[1]-1).attr("class", "cityname");
 
-          viewport
-            .selectAll("circle.company")
-            .attr("r", transform.k >= 2 ? 6 / transform.k : 4);
+      }
 
-          // viewport.selectAll("text.cityname").data(filteredNewCities).join("text").style("font-size", (transform.k > 3) ? "1px" : "0px").text(d => d.city).attr('x', d => (Number(d.rank)%2===0) ? d.Position[0] - 3 : d.Position[0] + 3)
-          //   .attr('y', d => d.Position[1]-1).attr("class", "cityname");
-        }
 
-        // console.log(filteredCities)
+      console.log(filteredCities)
 
-        function clicked(event, d) {
-          // console.log(d);
 
-          let bounds = path.bounds(d.geometry);
-          // console.log(bounds);
-          let dx = bounds[1][0] - bounds[0][0];
-          let dy = bounds[1][1] - bounds[0][1];
-          let x = (bounds[0][0] + bounds[1][0]) / 2;
-          let y = (bounds[0][1] + bounds[1][1]) / 2;
 
-          let scale = Math.max(
-            1,
-            Math.min(10, 0.9 / Math.max(dx / mapWidth, dy / mapHeight))
-          );
-          let translate = [mapWidth / 2 - x * scale, mapHeight / 2 - y * scale];
 
-          let newTransform = d3.zoomIdentity
-            .translate(translate[0], translate[1])
-            .scale(scale);
+      function clicked(event, d) {
 
-          map.transition().duration(1000).call(zoom.transform, newTransform);
-        }
+        // console.log(d);
 
-        viewport.selectAll(".state").on("click", clicked);
+        let bounds = path.bounds(d.geometry);
+        // console.log(bounds);
+        let dx = bounds[1][0] - bounds[0][0];
+        let dy = bounds[1][1] - bounds[0][1];
+        let x = (bounds[0][0] + bounds[1][0]) / 2;
+        let y = (bounds[0][1] + bounds[1][1]) / 2;
 
-        let tooltipWidth = 200;
-        let tooltipHeight = 150;
-        let tooltip = svg
-          .append("g")
-          .attr("class", "tooltip")
-          .attr("visibility", "hidden");
+        let scale = Math.max(1, Math.min(10, 0.9 / Math.max(dx / mapWidth,
+          dy / mapHeight)));
+        let translate = [mapWidth / 2 - x * scale, mapHeight / 2 - y * scale];
 
-        tooltip
-          .append("rect")
-          .attr("fill", "black")
-          .attr("opacity", 0.9)
-          .attr("x", 570)
-          .attr("y", 25)
-          .attr("width", tooltipWidth)
-          .attr("height", tooltipHeight);
-        let txt = tooltip
-          .append("text")
-          .attr("fill", "white")
-          .attr("text-anchor", "middle")
-          .attr("alignment-baseline", "hanging")
-          .attr("x", 650)
-          .attr("y", 70);
-        let txt2 = tooltip
-          .append("text")
-          .attr("fill", "white")
-          .attr("text-anchor", "middle")
-          .attr("alignment-baseline", "hanging")
-          .attr("x", 650)
-          .attr("y", 90);
+        let newTransform = d3.zoomIdentity
+          .translate(translate[0], translate[1])
+          .scale(scale);
 
-        circles.on("click", mouseClicked);
-        function mouseClicked() {
-          tooltip.style("visibility", "visible");
-          let circle = d3.select(this);
-          // salaries and companies
-          let circleCompanies = circle.datum().companies;
-          // find city for company
-          let circleCities = circle.datum().city;
-          // console.log(circleCities);
-          // find cost of living
-          let circleCoL = circle.datum().COL;
-          console.log(circleCoL);
+        map.transition().duration(1000).call(zoom.transform, newTransform);
 
-          txt.text(JSON.stringify(circleCompanies));
-          txt2.text(circleCoL);
-        }
+      }
 
-        // console.log(states);
-      };
 
-      requestData();
-    </script>
-  </body>
+      let tooltipWidth = 200;
+      let tooltipHeight = 150;
+      let tooltip = svg.append('g').attr("class", "tooltip")
+        .attr("visibility", "hidden");
+
+      tooltip.append("rect")
+        .attr("fill", "black")
+        .attr("opacity", 0.9)
+        .attr("x", 570)
+        .attr("y", 25)
+        .attr("width", tooltipWidth)
+        .attr("height", tooltipHeight)
+      let txt = tooltip.append("text")
+        .attr("fill", "white")
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "hanging")
+        .attr("x", 650)
+        .attr("y", 70);
+      let txt2 = tooltip.append("text")
+        .attr("fill", "white")
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "hanging")
+        .attr("x", 650)
+        .attr("y", 90);
+
+      circles.on("click", mouseClicked);
+      function mouseClicked() {
+        tooltip.style("visibility", "visible");
+        let circle = d3.select(this);
+        // salaries and companies
+        let circleCompanies = circle.datum().companies;
+        // find city for company
+        let circleCities = circle.datum().city;
+        // console.log(circleCities);
+        // find cost of living 
+        let circleCoL = circle.datum().COL;
+        console.log(circleCoL);
+
+        txt.text(JSON.stringify(circleCompanies));
+        txt2.text(circleCoL);
+
+
+      }
+
+      console.log(states);
+
+    }
+
+
+
+
+
+
+
+    requestData();
+
+
+  </script>
+</body>
+
 </html>
