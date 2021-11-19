@@ -51,9 +51,6 @@
 
         const cities = await d3.json("./data/cities.json");
 
-        const stateNames = await d3.tsv("./data/us-state-names.tsv");
-        // console.log(stateNames);
-
         // state object stuff
         var states = topojson.feature(usMap, usMap.objects.states);
 
@@ -71,14 +68,13 @@
           .append("path")
           .attr("class", "state")
           .attr("d", path);
+
         viewport
           .append("path")
           .datum(statesMesh)
           .attr("class", "border")
           .attr("d", path);
 
-        // states.append("state", "hi");
-        // console.log(states);
         // changing fortune 1000 dataset tox become a map with key: company name and value: all other attributes
         var fortune = d3.index(filteredFD, (d) => d.company);
         // console.log(fortune);
@@ -228,13 +224,12 @@
         // var cityLabel = viewport.selectAll("text.cityname").data(filteredCities).join("text").style("font-size", "12px" ).text(d => d.city).attr('x', d => d.Position[0] + 5)
         //   .attr('y', d => d.Position[1] + 5).attr("class", "cityname");
 
+        let stateClick = viewport.selectAll(".state");
+
         var zoom = d3.zoom().scaleExtent([1, 10]).on("zoom", mapZoomed);
 
         map.call(zoom);
-
         map.call(zoom.transform, d3.zoomIdentity);
-
-        viewport.selectAll(".state").on("click", clicked);
 
         function mapZoomed({ transform }) {
           viewport.attr("transform", transform.toString());
@@ -273,6 +268,8 @@
 
           map.transition().duration(1000).call(zoom.transform, newTransform);
         }
+
+        viewport.selectAll(".state").on("click", clicked);
 
         let tooltipWidth = 200;
         let tooltipHeight = 150;
