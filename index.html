@@ -1,104 +1,110 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://d3js.org/topojson.v3.min.js"></script>
-    <title>Project 2 for INFO 3300</title>
-    <meta charset="UTF-8" />
-    <style>
-      .state {
-        fill: lightgrey;
-      }
+<head>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/topojson.v3.min.js"></script>
+  <title> Project 2 for INFO 3300 </title>
+  <meta charset="UTF-8">
+  <style>
+    .state {
+      fill: lightgrey;
+    }
+    .border {
+      stroke: black;
+      stroke-width: 1px;
+      fill: none;
+    }
+  </style>
+</head>
 
-      .border {
-        stroke: black;
-        stroke-width: 1px;
-        fill: none;
-      }
-    </style>
-  </head>
+<body>
 
-  <body>
-    <svg id="usmap" height="800" width="900"></svg>
-    <script>
-      const svg = d3.select("#usmap");
-      const width = svg.attr("width");
-      const height = svg.attr("height");
-      const margin = { top: 10, right: 10, bottom: 10, left: 10 };
-      const mapWidth = width - margin.left - margin.right;
-      const mapHeight = height - margin.top - margin.bottom;
-      const map = svg
-        .append("g")
-        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+  <svg id="usmap" height="800" width="900"></svg>
+  <script>
+    const svg = d3.select("#usmap");
+    const width = svg.attr("width");
+    const height = svg.attr("height");
+    const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+    const mapWidth = width - margin.left - margin.right;
+    const mapHeight = height - margin.top - margin.bottom;
+    const map = svg.append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-      const requestData = async function () {
-        const fortuneData = await d3.csv("./data/Fortune_1000.csv");
-        // console.log(fortuneData);
-        const costOfLiving = await d3.csv("./data/cost-of-living-2018.csv");
-        // console.log(costOfLiving);
-        const stateName = await d3.tsv("./data/us-state-names.tsv");
-        // console.log(stateName);
 
-        // filtered the data by only returning the companies where the sector is listed as Technology
-        const filteredFD = fortuneData.filter((d) => {
-          return d.sector === "Technology";
-        });
-        // console.log(filteredFD);
 
-        const levelsFyi = await d3.csv("./data/Levels_Fyi_Salary_Data.csv");
-        // console.log(levelsFyi);
 
-        const usMap = await d3.json("./data/us.json");
-        // console.log(usMap);
 
-        const cities = await d3.json("./data/cities.json");
+    const requestData = async function () {
+      const fortuneData = await d3.csv('./data/Fortune_1000.csv');
+      console.log(fortuneData);
+      const costOfLiving = await d3.csv('./data/cost-of-living-2018.csv');
+      console.log(costOfLiving);
 
-        // state object stuff
-        var states = topojson.feature(usMap, usMap.objects.states);
-        // console.log(states);
+      // filtered the data by only returning the companies where the sector is listed as Technology
+      const filteredFD = fortuneData.filter((d) => { return d.sector === "Technology"; })
+      console.log(filteredFD);
 
-        console.log(stateName[0]);
-        states.features.forEach((d, i) => {
-          console.log(d.id);
-          console.log(stateName[d.id].code);
-          d["abbrv"] = stateName[d.id].code;
-        });
+      const levelsFyi = await d3.csv('./data/Levels_Fyi_Salary_Data.csv');
+      console.log(levelsFyi);
 
-        console.log(states);
-        var statesMesh = topojson.mesh(usMap, usMap.objects.states);
-        var projection = d3
-          .geoAlbersUsa()
-          .fitSize([mapWidth, mapHeight], states);
-        var path = d3.geoPath().projection(projection);
-        let viewport = map.append("g");
 
-        viewport
-          .selectAll(".state")
-          .data(states.features)
-          .enter()
-          .append("path")
-          .attr("class", "state")
-          .attr("d", path);
+      const usMap = await d3.json("./data/us.json");
+      console.log(usMap);
 
-        viewport
-          .append("path")
-          .datum(statesMesh)
-          .attr("class", "border")
-          .attr("d", path);
+      const cities = await d3.json("./data/cities.json");
 
-        // changing fortune 1000 dataset tox become a map with key: company name and value: all other attributes
-        var fortune = d3.index(filteredFD, (d) => d.company);
-        // console.log(fortune);
 
-        // filtering levelsFyi dataset to only contain companies that are in the fortune 1000 dataset and have the same city name
-        // this results in duplicates in the dataset -- entries will have the same company name and be in the same city, but each entry will be a different salary
-        let levelsFyiFiltered = levelsFyi.filter(function (d, i) {
-          d.citySplit = d.location.split(",");
-          let fortunekey = d.company;
-          let companyKey = fortune.get(fortunekey);
-          return fortune.has(fortunekey) && d.citySplit[0] === companyKey.city;
-        });
-        // console.log(levelsFyiFiltered);
+      // state object stuff
+      var states = topojson.feature(usMap, usMap.objects.states);
+
+      var statesMesh = topojson.mesh(usMap, usMap.objects.states);
+      var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
+      var path = d3.geoPath().projection(projection);
+      let viewport = map.append("g");
+
+      viewport.selectAll(".state").data(states.features)
+        .enter()
+        .append("path")
+        .attr("class", "state")
+        .attr("d", path);
+
+      viewport.append("path")
+        .datum(statesMesh)
+        .attr("class", "border")
+        .attr("d", path);
+
+
+
+      // changing fortune 1000 dataset tox become a map with key: company name and value: all other attributes
+      var fortune = d3.index(filteredFD, d => d.company);
+      console.log(fortune);
+
+      // filtering levelsFyi dataset to only contain companies that are in the fortune 1000 dataset and have the same city name
+      // this results in duplicates in the dataset -- entries will have the same company name and be in the same city, but each entry will be a different salary
+      let levelsFyiFiltered = levelsFyi.filter(function (d, i) {
+        d.citySplit = d.location.split(",");
+        let fortunekey = d.company;
+        let companyKey = fortune.get(fortunekey);
+        return ((fortune.has(fortunekey)) && (d.citySplit[0] === companyKey.city))
+      });
+      console.log(levelsFyiFiltered); 
+
+      // getting unique cities from levelsFyi data 
+      let duplicateCities = [];
+      fortune.forEach(d => {
+        duplicateCities.push(d.city);
+      })
+
+      let uniqueCities = duplicateCities.filter((city, i, ar) => ar.indexOf(city) === i);
+      console.log(duplicateCities);
+      console.log(uniqueCities);
+
+
+      // make the cities data a map with key: city, value: lat/long
+      var filteredCities = cities.filter(function (d) {
+        return uniqueCities.includes(d.city);
+      })
+      console.log(filteredCities); // not all cities in the company dataset are included in the lat/long dataset
 
 
       // adding cities that don't have longitude and latitude
@@ -197,11 +203,11 @@
           .domain(minMax)
           .range(["#fff", "#d1e8ed", "#adc2da", "#8879b3", "#762b80"]);
 
-        // map.selectAll(".state").style(
-        //   "fill",
-        //   (d) => console.log(d)
-        //   // colorScale(state_dict[d.id])
-        // );
+        map.selectAll(".state").style(
+          "fill",
+          (d) => console.log(d)
+          // colorScale(state_dict[d.id])
+        );
         console.log(state_dict);
 
         // getting unique cities from levelsFyi data
