@@ -213,8 +213,8 @@
         viewport.selectAll("circle.company")
           .attr('r', transform.k >= 2 ? 6 / transform.k : 4);
 
-        viewport.selectAll("text.cityname").data(filteredCities).join("text").style("font-size", (transform.k > 3) ? "2px" : "0px").text(d => d.city).attr('x', d => d.Position[0] + 3)
-          .attr('y', d => d.Position[1]-1).attr("class", "cityname");
+        // viewport.selectAll("text.cityname").data(filteredNewCities).join("text").style("font-size", (transform.k > 3) ? "1px" : "0px").text(d => d.city).attr('x', d => (Number(d.rank)%2===0) ? d.Position[0] - 3 : d.Position[0] + 3)
+        //   .attr('y', d => d.Position[1]-1).attr("class", "cityname");
 
       }
 
