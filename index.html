@@ -124,11 +124,33 @@
       })
       console.log(missingCities);
 
+      // filteredCities.push([{ "latitude": 41.8781136, "longitude": -87.6297982, "population": "2718782", "rank": "3", "city" : "test", "state":"whateverf"}])
       
-      missingCities.forEach(d => {
-        //filteredCities.d = d;
-      })
+      let citiesToAdd = [{"city": "Armonk",
+        "latitude": 41.1264849,
+        "longitude": -73.7140195,
+        "state": "New York"},
+        
+        {"city": "Menlo Park",
+        "latitude": 37.452961,
+        "longitude": -122.181725,
+        "state": "California"},
+
+        {"city": "Boise",
+        "latitude": 43.618881,
+        "longitude": -116.215019},
+        
+        {"city": "Newtown",
+        "latitude": 38.917130,
+        "longitude": -77.222237}
+      
+      ]
+      // hard coding additional latitude and longitude that is missing from the dataset
+      citiesToAdd.forEach( d => {
+        filteredCities.push(d);
+      } )
       console.log(filteredCities);
+
 
       // get the latitude and longitutde positions for the city locations of companies
       filteredCities.forEach(d => {
