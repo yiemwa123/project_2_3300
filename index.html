@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 
 <head>
@@ -16,12 +15,23 @@
       stroke-width: 1px;
       fill: none;
     }
+
+    .labelThing {
+      stroke: black;
+      stroke-width: 2px;
+    }
+    
   </style>
 </head>
 
 <body>
   <svg id="usmap" height="800" width="900"></svg>
   <div id="buttoncont"></div>
+  <div id="legend">
+    <svg id = "legendsvg">
+
+    </svg>
+  </div>
   <script>
     const svg = d3.select("#usmap");
     const width = svg.attr("width");
@@ -112,42 +122,6 @@
       });
       // console.log(levelsFyiFiltered);
 
-      var salary_dict = {};
-      levelsFyiFiltered.forEach((b, i) => {
-        if (b.company in salary_dict) {
-          salary_dict[b.company]["salary"].push(b.totalyearlycompensation);
-        } else {
-          salary_dict[b.company] = {
-            state: b.citySplit[1].slice(1, 3),
-            salary: [b.totalyearlycompensation],
-          };
-        }
-      });
-      // console.log(salary_dict);
-
-      var state_dict = {};
-      var company_total = 0;
-
-      for ([key, val] of Object.entries(salary_dict)) {
-        if (val.state in state_dict) {
-          state_dict[val.state]++;
-          company_total++;
-        } else {
-          state_dict[val.state] = 1;
-          company_total++;
-        }
-      }
-      console.log(state_dict);
-      // we hard coded extent to make the range of colors smoother and more informative
-      const minMax = d3.extent([0, 5]);
-
-      // BEST ONE FOR NOW
-      const colorScale = d3.scaleSequential(minMax, d3.interpolateSpectral);
-
-      map
-        .selectAll(".state")
-        .style("fill", (d) => colorScale(state_dict[d.abbrv]));
-      // console.log(state_dict);
 
       // getting unique cities from levelsFyi data
       let duplicateCities = [];
@@ -164,11 +138,49 @@
       // make the cities data a map with key: city, value: lat/long
       var filteredCities = cities.filter(function (d) {
         return uniqueCities.includes(d.city);
-      });
-      // console.log(filteredCities); // not all cities in the company dataset are included in the lat/long dataset
+      })
+      console.log(filteredCities); // not all cities in the company dataset are included in the lat/long dataset
 
-      // get the latitude and longitude positions for the city locations of companies
-      filteredCities.forEach((d) => {
+
+      // adding cities that don't have longitude and latitude
+      let allCities = [];
+      filteredCities.forEach( (d,i) => {
+        allCities.push(d.city);
+      })
+      console.log(allCities);
+
+      var missingCities = [];
+      uniqueCities.forEach( (d,i) => {
+        if (!allCities.includes(d)) {
+          missingCities.push(d);
+        }
+      })
+      console.log(missingCities);
+
+      let citiesToAdd = [{"city": "Armonk",
+        "latitude": 41.1264849,
+        "longitude": -73.7140195,
+        "state": "New York"},
+        
+        {"city": "Menlo Park",
+        "latitude": 37.452961,
+        "longitude": -122.181725,
+        "state": "California"},
+
+        {"city": "Boise",
+        "latitude": 43.618881,
+        "longitude": -116.215019}
+      
+      ]
+      // hard coding additional latitude and longitude that is missing from the dataset
+      citiesToAdd.forEach( d => {
+        filteredCities.push(d);
+      } )
+      console.log(filteredCities);
+
+
+      // get the latitude and longitutde positions for the city locations of companies
+      filteredCities.forEach(d => {
         d.Position = projection([d.longitude, d.latitude]);
         // console.log(d.Position);
       });
@@ -227,7 +239,85 @@
       var filteredNewCities = filteredCities.filter(function (d) {
         return Object.keys(d.companies).length !== 0;
       });
-      // console.log(filteredNewCities);
+      console.log(filteredNewCities);
+
+      
+      // var citiesMapped = [];
+      // filteredNewCities.forEach( function(d) {
+      //   Object.keys(d.companies).forEach( b => citiesMapped.push(b));
+
+      // });
+      // console.log(citiesMapped);
+      // console.log(levelsFyiFiltered);
+      // let levelsFyiFilteredStates = levelsFyiFiltered.filter( function(d) {
+      //   console.log(d.company);
+      //   return (citiesMapped.includes(d.company))
+      // })
+      // console.log(levelsFyiFilteredStates);
+
+      // coloring the states by the number of companies in each state
+      var salary_dict = {};
+      levelsFyiFiltered.forEach((b, i) => {
+        if (b.company in salary_dict) {
+          salary_dict[b.company]["salary"].push(b.totalyearlycompensation);
+        } else {
+          salary_dict[b.company] = {
+            state: b.citySplit[1].slice(1, 3),
+            salary: [b.totalyearlycompensation],
+          };
+        }
+      });
+      // console.log(salary_dict);
+
+      var state_dict = {};
+      var company_total = 0;
+
+      for ([key, val] of Object.entries(salary_dict)) {
+        if (val.state in state_dict) {
+          state_dict[val.state]++;
+          company_total++;
+        } else {
+          state_dict[val.state] = 1;
+          company_total++;
+        }
+      }
+
+      stateName.forEach((d,i) => {
+        if (!(d.code in state_dict)) {
+          state_dict[d.code] = 0
+        }
+      })
+      state_dict['VA'] = 0;
+      console.log(state_dict)
+      // console.log(salary_dict);
+      // console.log(state_dict);
+      
+      // we hard coded extent to make the range of colors smoother and more informative
+      // const minMax = d3.extent(Object.values(state_dict));
+      // console.log(minMax);
+      console.log(Object.values(state_dict).sort((a,b) => a-b));
+
+      // changed color scale
+      // credit: https://colorbrewer2.org/#type=sequential&scheme=YlGnBu&n=5
+      const colorScale = d3.scaleOrdinal(Object.values(state_dict).sort((a,b) => a-b), ["lightgrey", "#ffffcc", "#a1dab4", "#41b6c4", "#2c7fb8", "#253494"]);
+
+      // code if we want to use fortune data not filtered by tech
+      // changed color scale
+      // credit: https://colorbrewer2.org/#type=sequential&scheme=YlGnBu&n=5
+      //const colorScale = d3.scaleOrdinal(Object.values(state_dict).sort((a,b) => a-b), ["lightgrey", "#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#253494", "#081d58"]);
+
+
+      // add a conditional so that if state is not in state dict, color it gray
+      map
+        .selectAll(".state")
+        .style("fill", (d) => colorScale(state_dict[d.abbrv]));
+      // console.log(state_dict);
+
+      // draw a legend
+      
+      let legend = d3.select('svg#legendsvg');
+
+
 
       // // plot the cities with longitude and latitude and add companies to them
       var circles = viewport
@@ -238,6 +328,7 @@
         .attr("cx", (d) => d.Position[0])
         .attr("cy", (d) => d.Position[1])
         .style("fill", "black")
+        .style("stroke", "pink")
         .attr("r", 5);
 
       // var cityLabel = viewport.selectAll("text.cityname").data(filteredCities).join("text").style("font-size", "12px" ).text(d => d.city).attr('x', d => d.Position[0] + 5)
@@ -260,22 +351,23 @@
       tooltip
         .append("rect")
         .attr("class", "labelThing")
-        .attr("fill", "black")
-        .attr("opacity", 0.9)
+        .attr("fill", "white")
         .attr("width", tooltipWidth)
         .attr("height", tooltipHeight)
         .attr("x", 0)
         .attr("y", 0);
       let txt = tooltip
         .append("text")
-        .attr("fill", "white")
+        .attr("class","tooltipText")
+        .attr("fill", "black")
         .attr("text-anchor", "middle")
         .attr("alignment-baseline", "hanging")
         .attr("x", 650)
         .attr("y", 70);
       let txt2 = tooltip
         .append("text")
-        .attr("fill", "white")
+        .attr("class", "tooltipText")
+        .attr("fill", "black")
         .attr("text-anchor", "middle")
         .attr("alignment-baseline", "hanging")
         .attr("x", 650)
@@ -288,7 +380,8 @@
 
         viewport
           .selectAll("circle.company")
-          .attr("r", transform.k >= 2 ? 6 / transform.k : 4);
+          .attr("r", transform.k >= 2 ? 6 / transform.k : 4)
+          .style("stroke-width", transform.k >= 1 ? 2 / transform.k : 0.5);
 
 
         var x_loc = d3.select(".labelThing").attr("x")
@@ -298,6 +391,9 @@
 
 
         d3.select(".labelThing").attr("x", transform.k > 1 ? (x_loc - transform.x) / transform.k : 0)
+          .attr("y", transform.k > 1 ? (y_loc - transform.y) / transform.k : 0);
+        
+        d3.select(".tooltipText").attr("x", transform.k > 1 ? (x_loc - transform.x) / transform.k : 0)
           .attr("y", transform.k > 1 ? (y_loc - transform.y) / transform.k : 0);
 
 
@@ -320,7 +416,7 @@
         // console.log(d);
 
         let bounds = path.bounds(d.geometry);
-        // console.log(bounds);
+        console.log(bounds);
         let dx = bounds[1][0] - bounds[0][0];
         let dy = bounds[1][1] - bounds[0][1];
         let x = (bounds[0][0] + bounds[1][0]) / 2;
@@ -356,16 +452,20 @@
         tooltip.style("visibility", "visible");
         circle = d3.select(this).datum();
         // salaries and companies
+        console.log(circle);
         let circleCompanies = circle.companies;
         // find city for company
         let circleCities = circle.city;
-        // console.log(circleCities);
+        console.log(circleCities);
         // find cost of living
         let circleCoL = circle.COL;
-        console.log(circleCoL);
+        //console.log(circleCoL);
+        console.log(circleCompanies);
+
+
 
         txt.text(JSON.stringify(circleCompanies));
-        txt2.text(circleCoL);
+       // txt2.text(circleCoL);
 
         d3.select(".labelThing").attr("x", circle.Position[0] + 5)
           .attr("y", circle.Position[1] + 20)
@@ -376,10 +476,16 @@
       }
 
       // console.log(states);
+
+      
+
     };
 
     requestData();
   </script>
+
+
+  
 </body>
 
 </html>
