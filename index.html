@@ -36,6 +36,8 @@
         // console.log(fortuneData);
         const costOfLiving = await d3.csv("./data/cost-of-living-2018.csv");
         // console.log(costOfLiving);
+        const stateName = await d3.tsv("./data/us-state-names.tsv");
+        // console.log(stateName);
 
         // filtered the data by only returning the companies where the sector is listed as Technology
         const filteredFD = fortuneData.filter((d) => {
@@ -53,7 +55,16 @@
 
         // state object stuff
         var states = topojson.feature(usMap, usMap.objects.states);
+        // console.log(states);
 
+        console.log(stateName[0]);
+        states.features.forEach((d, i) => {
+          console.log(d.id);
+          console.log(stateName[d.id].code);
+          d["abbrv"] = stateName[d.id].code;
+        });
+
+        console.log(states);
         var statesMesh = topojson.mesh(usMap, usMap.objects.states);
         var projection = d3
           .geoAlbersUsa()
@@ -123,11 +134,11 @@
           .domain(minMax)
           .range(["#fff", "#d1e8ed", "#adc2da", "#8879b3", "#762b80"]);
 
-        map.selectAll(".state").style(
-          "fill",
-          (d) => console.log(d)
-          // colorScale(state_dict[d.id])
-        );
+        // map.selectAll(".state").style(
+        //   "fill",
+        //   (d) => console.log(d)
+        //   // colorScale(state_dict[d.id])
+        // );
         console.log(state_dict);
 
         // getting unique cities from levelsFyi data
