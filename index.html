@@ -24,15 +24,17 @@
     #legend {
       margin-left: 250;
     }
+
     #titlediv {
       margin-bottom: 20px;
     }
+
     p {
       font-family: avenir;
       font-size: 18;
       font-style: italic;
       fill: black;
-    
+
     }
 
     .container {
@@ -41,23 +43,22 @@
       margin-bottom: 20px;
 
     }
-
-    
   </style>
 </head>
 
 <body>
   <div id='titlediv'>
-    <svg id = "titlesvg" width = "900" height= "100"></svg>
+    <svg id="titlesvg" width="900" height="100"></svg>
   </div>
   <div class="container">
-    <p>The dots on the map below show cities that have Fortune 1000 Tech companies in the United States. Click anywhere on the map to zoom in closer to a state. 
+    <p>The dots on the map below show cities that have Fortune 1000 Tech companies in the United States. Click anywhere
+      on the map to zoom in closer to a state.
       Click on the "Zoom Out" button in the bottom left to zoom out completely.</p>
   </div>
   <svg id="usmap" height="800" width="900"></svg>
   <div id="buttoncont"></div>
   <div id="legend">
-    <svg id = "legendsvg" height = "100" width = "600">
+    <svg id="legendsvg" height="100" width="600">
 
     </svg>
   </div>
@@ -341,7 +342,7 @@
       // changed color scale
       // credit: https://colorbrewer2.org/#type=sequential&scheme=YlGnBu&n=5
       //const colorScale = d3.scaleOrdinal(Object.values(state_dict).sort((a,b) => a-b), ["lightgrey", "#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#253494", "#081d58"]);
-      let uniqueNumbers = (Object.values(state_dict).sort((a,b) => a-b)).filter(
+      let uniqueNumbers = (Object.values(state_dict).sort((a, b) => a - b)).filter(
         (value, i, ar) => ar.indexOf(value) === i
       );
 
@@ -358,32 +359,32 @@
       let legend = d3.select('svg#legendsvg');
       // Add one dot in the legend for each name.
       legend.append("text")
-            .text('Legend: Number of companies in each state')
-            .attr('x', 70)
-            .attr('y', 25)
-            .style('font-family', 'avenir')
-            .style('font-size', 15);
+        .text('Legend: Number of companies in each state')
+        .attr('x', 70)
+        .attr('y', 25)
+        .style('font-family', 'avenir')
+        .style('font-size', 15);
 
       legend.selectAll("rect.legendsquare")
         .data(uniqueNumbers)
         .join("rect")
-          .attr('class', 'legendsquare')
-          .attr("x", function(d,i){ {return 10 + i*70}})
-          .attr("y", 50) 
-          .attr("rx", 7)
-          .attr("ry", 7)
-          .attr("width", 20)
-          .attr("height", 20)
-          .style("fill", function(d){ return colorScale(d)})
+        .attr('class', 'legendsquare')
+        .attr("x", function (d, i) { { return 10 + i * 70 } })
+        .attr("y", 50)
+        .attr("rx", 7)
+        .attr("ry", 7)
+        .attr("width", 20)
+        .attr("height", 20)
+        .style("fill", function (d) { return colorScale(d) })
 
       //Add one dot in the legend for each name.
       legend.selectAll("labels")
         .data(uniqueNumbers)
         .join("text")
-        .attr("x", function(d,i){ return 40 + i*70})
-        .attr("y", 60) 
+        .attr("x", function (d, i) { return 40 + i * 70 })
+        .attr("y", 60)
         .style("fill", "black")
-        .text(function(d){ return d})
+        .text(function (d) { return d })
         .attr("text-anchor", "left")
         .style('font-family', 'avenir')
         .style("alignment-baseline", "middle")
@@ -452,8 +453,8 @@
         .attr("y", 0);
 
       function mapZoomed({ transform }) {
-  
-    
+
+
 
         viewport.attr("transform", transform.toString());
 
@@ -464,34 +465,34 @@
           .attr("r", transform.k >= 2 ? 6 / transform.k : 4)
           .style("stroke-width", transform.k >= 1 ? 2 / transform.k : 0.5);
 
-        circles.on("mouseover", function () {
+        // circles.on("mouseover", function () {
 
-          let circle = d3.select(this).datum()
-
-
-          d3.select(this).attr('r', `${(8/ transform.k)}`);
+        //   let circle = d3.select(this).datum()
 
 
-          
-
-          viewport.append("rect").attr("class", "cityBack").attr("x", `${circle.Position[0] + (2/ transform.k)}`).attr("y", `${circle.Position[1] + (10 / transform.k)}`).attr("height", `${40 / transform.k}`).attr("width", `${175 / transform.k}`).attr("fill", "white").attr("stroke", "black").attr("stroke-width", `${1 / transform.k}`);
-
-          viewport.append("text").attr("class", "city").text(circle.city).style("font-size", `${20 / transform.k}`).attr("x",  `${circle.Position[0] + (20 / transform.k)}`).attr("y", `${circle.Position[1] + (15 / transform.k)}`).attr("text-anchor", "start")
-        .attr("alignment-baseline", "hanging")
+        //   d3.select(this).attr('r', `${(8/ transform.k)}`);
 
 
-        });
 
 
-        circles.on("mouseout", function () {
+        //   viewport.append("rect").attr("class", "cityBack").attr("x", `${circle.Position[0] + (2/ transform.k)}`).attr("y", `${circle.Position[1] + (10 / transform.k)}`).attr("height", `${40 / transform.k}`).attr("width", `${175 / transform.k}`).attr("fill", "white").attr("stroke", "black").attr("stroke-width", `${1 / transform.k}`);
 
-          d3.select(this).attr('r', `${(5/ transform.k)}`);
-
-          d3.select(".city").remove();
-          d3.select(".cityBack").remove();
+        //   viewport.append("text").attr("class", "city").text(circle.city).style("font-size", `${20 / transform.k}`).attr("x",  `${circle.Position[0] + (20 / transform.k)}`).attr("y", `${circle.Position[1] + (15 / transform.k)}`).attr("text-anchor", "start")
+        // .attr("alignment-baseline", "hanging")
 
 
-        });
+        // });
+
+
+        // circles.on("mouseout", function () {
+
+        //   d3.select(this).attr('r', `${(5/ transform.k)}`);
+
+        //   d3.select(".city").remove();
+        //   d3.select(".cityBack").remove();
+
+
+        // });
 
 
         // var x_loc = d3.select(".labelThing").attr("x")
@@ -525,7 +526,7 @@
       function clicked(event, d) {
 
         // console.log(d);
-      
+
 
         let bounds = path.bounds(d.geometry);
         console.log(bounds);
@@ -570,7 +571,7 @@
 
       circles.on("click", function () {
 
-       
+
 
         tooltip.style("visibility", "visible");
 
@@ -598,6 +599,16 @@
         var average_salaries = Object.values(circleCompanies);
         // console.log(average_salaries);
         var heightBox
+
+        tooltip
+          .append("text")
+          .attr("class", "tooltipText")
+          .attr("fill", "black")
+          .attr("text-anchor", "start")
+          .attr("alignment-baseline", "hanging")
+          .text("City: " + circleCities).attr("x", circle.Position[0] + 10)
+          .attr("y", circle.Position[1] + 30 ).style("text-decoration", "underline");
+
         for (let i = 0; i < company_names.length; i++) {
           tooltip
             .append("text")
@@ -606,7 +617,7 @@
             .attr("text-anchor", "start")
             .attr("alignment-baseline", "hanging")
             .text("Company: " + company_names[i]).attr("x", circle.Position[0] + 10)
-            .attr("y", circle.Position[1] + 30 + 2 * i * 20 + 3);
+            .attr("y", circle.Position[1] + 50 + 2 * i * 20 + 3);
           console.log(company_names[i]);
           tooltip
             .append("text")
@@ -615,12 +626,12 @@
             .attr("text-anchor", "start")
             .attr("alignment-baseline", "hanging")
             .text("Average Salary: $" + average_salaries[i]).attr("x", circle.Position[0] + 10)
-            .attr("y", circle.Position[1] + 50 + 2 * i * 20 - 3);
+            .attr("y", circle.Position[1] + 70 + 2 * i * 20 - 3);
 
-            heightBox=50 + 2 * i * 20;
+          heightBox = 70 + 2 * i * 20;
         }
 
-        d3.select(".labelThing").attr("height", heightBox+10);
+        d3.select(".labelThing").attr("height", heightBox + 10);
 
 
       });
@@ -632,19 +643,19 @@
       // adding a title
       let title = d3.select("svg#titlesvg");
       title.append('rect')
-           .style('fill', "#253494")
-           .attr('x',0)
-           .attr('y', 0)
-           .attr('height', 100)
-           .attr('width', 900);
+        .style('fill', "#253494")
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('height', 100)
+        .attr('width', 900);
 
       title.append('text')
-          .text('Map of Salaries of Fortune 1000 Tech Companies in the United States')
-          .attr('x', 60)
-          .attr('y', 50)
-          .attr('fill', 'white')
-          .attr('font-size', 25)
-          .style('font-family', 'avenir');
+        .text('Map of Salaries of Fortune 1000 Tech Companies in the United States')
+        .attr('x', 60)
+        .attr('y', 50)
+        .attr('fill', 'white')
+        .attr('font-size', 25)
+        .style('font-family', 'avenir');
 
       // title.append('text')
       //      .text('The dots on the map below show cities that have Fortune 1000 Tech companies in the United States. Click anywhere on the map to zoom in closer to a state. Click on the "Zoom Out" button in the bottom left to zoom out completely.')
@@ -654,7 +665,7 @@
       //      .style('font-size', 18)
       //      .style('font-style', 'italic')
       //      .attr('fill', 'black');
-      
+
 
     };
 
