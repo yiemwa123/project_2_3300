@@ -71,9 +71,10 @@
     <p>The dots on the map below show cities that have Fortune 1000 Tech companies in the United States. Click anywhere
       on the map to zoom in closer to a state.
       Click on the "Zoom Out" button located on the bottom to zoom out completely. Click on a black dot to reveal the
-      name of the city, companies in each city, as well as the average salary for those companies.</p>
+      name of the city, cost of living in the state, companies in each city, as well as the average salary for those companies. 
+      Note: Cost of Living is relative to the national average represented by 100 </p>
   </div>
-  <svg id="usmap" height="500" width="900"></svg>
+  <svg id="usmap" height="500" width="1500"></svg>
   <div id="buttoncont"></div>
   <div id="containerp">
     <p>*States that are gray do not have any companies in them.</p>
@@ -164,7 +165,7 @@
         .geoAlbersUsa()
         .fitSize([mapWidth, mapHeight], states);
       var path = d3.geoPath().projection(projection);
-      
+
       let viewport = map.append("g");
 
       viewport
@@ -313,6 +314,35 @@
         return Object.keys(d.companies).length !== 0;
       });
 
+      //Data Source: https://worldpopulationreview.com/state-rankings/cost-of-living-index-by-state
+      var colDict = {
+        NY: 139.1,
+        Illinois: 94.5,
+        Arizona: 97,
+        Texas: 91.5,
+        Washington: 110.7,
+        NC: 94.9,
+        Connecticut: 127.7,
+        Idaho: 92.3,
+        California: 151.7,
+        Massachusetts: 131.6,
+        Georgia: 89.2
+      };
+
+      filteredNewCities.forEach((d, i) => {
+        let key = "hi";
+        if (d.state == "New York") {
+          key = "NY";
+        } else if (d.state == "North Carolina") {
+          key = "NC";
+        } else {
+          key = d.state;
+        }
+
+        d["COL"] = colDict[key];
+
+      });
+
       // coloring the states by the number of companies in each state
       var salary_dict = {};
       levelsFyiFiltered.forEach((b, i) => {
@@ -358,7 +388,7 @@
           state_dict[d.code] = { count: 0, avg_salary: null }
         }
       })
-      state_dict['VA'] = { count: 0, avg_salary: 0 };
+      state_dict['VA'] = { count: 0, avg_salary: 0};
 
       let avgsal = [];
       Object.entries(state_dict).forEach(d => {
@@ -426,32 +456,7 @@
         .attr("width", tooltipWidth)
         .attr("x", 0)
         .attr("y", 0);
-      let txt = tooltip
-        .append("text")
-        .attr("class", "tooltipText")
-        .attr("fill", "black")
-        .attr("text-anchor", "start")
-        .attr("alignment-baseline", "hanging")
-        .attr("x", 0)
-        .attr("y", 0);
 
-      let txt2 = tooltip
-        .append("text")
-        .attr("class", "tooltipText")
-        .attr("fill", "black")
-        .attr("text-anchor", "start")
-        .attr("alignment-baseline", "hanging")
-        .attr("x", 0)
-        .attr("y", 0);
-
-      let txt3 = tooltip
-        .append("text")
-        .attr("class", "tooltipText")
-        .attr("fill", "black")
-        .attr("text-anchor", "start")
-        .attr("alignment-baseline", "hanging")
-        .attr("x", 0)
-        .attr("y", 0);
 
       // Credit: Prof. Rz, Lecture 10.25.2021
       function mapZoomed({ transform }) {
@@ -526,6 +531,9 @@
         // cost of living of circle
         let circleCoL = circle.COL;
 
+        //state location
+        let circleState=circle.state;
+
         d3.select(".labelThing").attr("x", circle.Position[0] + 5)
           .attr("y", circle.Position[1] + 20)
 
@@ -540,8 +548,17 @@
           .attr("fill", "black")
           .attr("text-anchor", "start")
           .attr("alignment-baseline", "hanging")
-          .text("City: " + circleCities).attr("x", circle.Position[0] + 10)
+          .text("City: " + circleCities + ', ' + circleState).attr("x", circle.Position[0] + 10)
           .attr("y", circle.Position[1] + 30).style("text-decoration", "underline");
+
+        tooltip
+          .append("text")
+          .attr("class", "tooltipText")
+          .attr("fill", "black")
+          .attr("text-anchor", "start")
+          .attr("alignment-baseline", "hanging")
+          .text("Cost of Living for State: " + circleCoL).attr("x", circle.Position[0] + 10)
+          .attr("y", circle.Position[1] + 50).style("text-decoration", "underline");
 
         // appending company names and average salaries to tool tip
         for (let i = 0; i < company_names.length; i++) {
@@ -552,7 +569,7 @@
             .attr("text-anchor", "start")
             .attr("alignment-baseline", "hanging")
             .text("Company: " + company_names[i]).attr("x", circle.Position[0] + 10)
-            .attr("y", circle.Position[1] + 50 + 2 * i * 20 + 3);
+            .attr("y", circle.Position[1] + 70 + 2 * i * 20 + 3);
           tooltip
             .append("text")
             .attr("class", "tooltipText")
@@ -560,9 +577,9 @@
             .attr("text-anchor", "start")
             .attr("alignment-baseline", "hanging")
             .text("Average Salary: $" + average_salaries[i]).attr("x", circle.Position[0] + 10)
-            .attr("y", circle.Position[1] + 70 + 2 * i * 20 - 3);
+            .attr("y", circle.Position[1] + 90 + 2 * i * 20 - 3);
 
-          heightBox = 70 + 2 * i * 20;
+          heightBox = 90 + 2 * i * 20;
         }
         d3.select(".labelThing").attr("height", heightBox + 10);
       });
