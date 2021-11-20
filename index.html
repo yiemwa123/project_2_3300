@@ -6,8 +6,10 @@
   <title>Project 2 for INFO 3300</title>
   <meta charset="UTF-8" />
   <style>
-    body{
+    body {
       text-align: center;
+      font-family: avenir;
+
     }
 
     .state {
@@ -55,7 +57,7 @@
 
     #containerp {
       margin-left: 170px;
-      margin:auto;
+      margin: auto;
 
     }
   </style>
@@ -156,6 +158,7 @@
         d["abbrv"] = stateName[i].code;
       });
 
+      //creating mesh for drawing states and map
       var statesMesh = topojson.mesh(usMap, usMap.objects.states);
       var projection = d3
         .geoAlbersUsa()
@@ -360,7 +363,7 @@
       Object.entries(state_dict).forEach(d => {
         avgsal.push(d[1].avg_salary);
       })
-
+      // min and max of average sal.
       const minMax = d3.extent(avgsal);
 
       // changed color scale
@@ -464,6 +467,7 @@
       map.call(zoom);
       map.call(zoom.transform, d3.zoomIdentity);
 
+      // function for when map is clicked on and zoomed in 
       function clicked(event, d) {
 
         let bounds = path.bounds(d.geometry);
@@ -491,16 +495,14 @@
 
       viewport.selectAll(".state").on("click", clicked);
 
-
+      // zooming out of map
       function zoomOut() {
 
         map.transition().duration(1000).call(zoom.transform, d3.zoomIdentity);
       };
 
+      // click function that brings up tool tip
       circles.on("click", function () {
-
-
-
         tooltip.style("visibility", "visible");
 
         d3.selectAll(".tooltipText").remove();
@@ -555,12 +557,8 @@
 
           heightBox = 70 + 2 * i * 20;
         }
-
         d3.select(".labelThing").attr("height", heightBox + 10);
-
-
       });
-
 
     };
 
