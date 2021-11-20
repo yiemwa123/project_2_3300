@@ -344,8 +344,7 @@
       var zoom = d3.zoom().scaleExtent([1, 10]).on("zoom", mapZoomed);
 
 
-      let tooltipWidth = 200;
-      let tooltipHeight = 300;
+      let tooltipWidth = 250;
       let tooltip = svg
         .append("g")
         .attr("class", "tooltip")
@@ -358,7 +357,6 @@
         .attr("class", "labelThing")
         .attr("fill", "white")
         .attr("width", tooltipWidth)
-        .attr("height", tooltipHeight)
         .attr("x", 0)
         .attr("y", 0);
       let txt = tooltip
@@ -388,7 +386,8 @@
         .attr("y", 0);
 
       function mapZoomed({ transform }) {
-        d3.select(".tooltipText").remove();
+  
+    
 
         viewport.attr("transform", transform.toString());
 
@@ -404,7 +403,15 @@
           let circle = d3.select(this).datum()
 
 
-          viewport.append("text").attr("class", "city").text(circle.city).style("font-size", `${20 / transform.k}`).attr("x", circle.Position[0] + 2).attr("y", circle.Position[1] + 2)
+          d3.select(this).attr('r', `${(8/ transform.k)}`);
+
+
+          
+
+          viewport.append("rect").attr("class", "cityBack").attr("x", `${circle.Position[0] + (2/ transform.k)}`).attr("y", `${circle.Position[1] + (10 / transform.k)}`).attr("height", `${40 / transform.k}`).attr("width", `${175 / transform.k}`).attr("fill", "white").attr("stroke", "black").attr("stroke-width", `${1 / transform.k}`);
+
+          viewport.append("text").attr("class", "city").text(circle.city).style("font-size", `${20 / transform.k}`).attr("x",  `${circle.Position[0] + (20 / transform.k)}`).attr("y", `${circle.Position[1] + (15 / transform.k)}`).attr("text-anchor", "start")
+        .attr("alignment-baseline", "hanging")
 
 
         });
@@ -412,9 +419,10 @@
 
         circles.on("mouseout", function () {
 
-
+          d3.select(this).attr('r', `${(5/ transform.k)}`);
 
           d3.select(".city").remove();
+          d3.select(".cityBack").remove();
 
 
         });
@@ -449,7 +457,9 @@
       // console.log(filteredCities)
 
       function clicked(event, d) {
+
         // console.log(d);
+      
 
         let bounds = path.bounds(d.geometry);
         console.log(bounds);
@@ -457,7 +467,9 @@
         let dy = bounds[1][1] - bounds[0][1];
         let x = (bounds[0][0] + bounds[1][0]) / 2;
         let y = (bounds[0][1] + bounds[1][1]) / 2;
+
         circles.style("fill", "black");
+        d3.selectAll(".tooltipText").remove();
         tooltip.style("visibility", "hidden");
 
         let scale = Math.max(
@@ -491,8 +503,12 @@
       };
 
       circles.on("click", function () {
-        d3.select(".tooltipText").remove();
+
+       
+
         tooltip.style("visibility", "visible");
+
+        d3.selectAll(".tooltipText").remove();
 
         circles.style("fill", "black");
 
@@ -515,6 +531,7 @@
         // console.log(company_names);
         var average_salaries = Object.values(circleCompanies);
         // console.log(average_salaries);
+        var heightBox
         for (let i = 0; i < company_names.length; i++) {
           tooltip
             .append("text")
@@ -523,7 +540,7 @@
             .attr("text-anchor", "start")
             .attr("alignment-baseline", "hanging")
             .text("Company: " + company_names[i]).attr("x", circle.Position[0] + 10)
-            .attr("y", circle.Position[1] + 30 + 2 * i * 20);
+            .attr("y", circle.Position[1] + 30 + 2 * i * 20 + 3);
           console.log(company_names[i]);
           tooltip
             .append("text")
@@ -531,9 +548,15 @@
             .attr("fill", "black")
             .attr("text-anchor", "start")
             .attr("alignment-baseline", "hanging")
-            .text("Average Salary: " + average_salaries[i]).attr("x", circle.Position[0] + 10)
-            .attr("y", circle.Position[1] + 50 + 2 * i * 20);
+            .text("Average Salary: $" + average_salaries[i]).attr("x", circle.Position[0] + 10)
+            .attr("y", circle.Position[1] + 50 + 2 * i * 20 - 3);
+
+            heightBox=50 + 2 * i * 20;
         }
+
+        d3.select(".labelThing").attr("height", heightBox+10);
+
+
       });
 
 
