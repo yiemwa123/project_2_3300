@@ -52,6 +52,10 @@
 
     }
 
+    #legendtitle p{
+      margin-left: 280px;
+    }
+
     
   </style>
 </head>
@@ -68,6 +72,9 @@
   <div id="buttoncont"></div>
   <div id="containerp">
     <p>*States that are gray do not have any companies in them.</p>
+  </div>
+  <div id ="legendtitle">
+    <p>Average Salary of Companies Per State</p>
   </div>
   <div id="legend">
     <svg id="legendsvg" height="100" width="600">
@@ -406,41 +413,6 @@
       // draw a legend
 
       drawLegend(d3.select("svg#legendsvg"), colorScale);
-
-      // let legend = d3.select('svg#legendsvg');
-      // // Add one dot in the legend for each name.
-      // legend.append("text")
-      //       .text('Legend: Number of companies in each state')
-      //       .attr('x', 70)
-      //       .attr('y', 25)
-      //       .style('font-family', 'avenir')
-      //       .style('font-size', 15);
-
-      // legend.selectAll("rect.legendsquare")
-      //   .data(thresholds)
-      //   .join("rect")
-      //     .attr('class', 'legendsquare')
-      //     .attr("x", function(d,i){ {return 10 + i*100}})
-      //     .attr("y", 50) 
-      //     .attr("rx", 7)
-      //     .attr("ry", 7)
-      //     .attr("width", 20)
-      //     .attr("height", 20)
-      //     .style("fill", d => colorScale(d))
-
-      // //Add one dot in the legend for each name.
-      // legend.selectAll("labels")
-      //   .data(thresholds)
-      //   .join("text")
-      //   .attr("x", function(d,i){ return 40 + i*100})
-      //   .attr("y", 60) 
-      //   .style("fill", "black")
-      //   .text(function(d){ return d})
-      //   .attr("text-anchor", "left")
-      //   .style('font-family', 'avenir')
-      //   .style("alignment-baseline", "middle")
-
-
 
       // // plot the cities with longitude and latitude and add companies to them
       var circles = viewport
