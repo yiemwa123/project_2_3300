@@ -440,14 +440,14 @@
 
       var zoom = d3.zoom().scaleExtent([1, 10]).on("zoom", mapZoomed);
 
+
+      // Credit: Prof. Rz, Lecture 10.13.2021
       // tooltip intialization
       let tooltipWidth = 250;
       let tooltip = svg
         .append("g")
         .attr("class", "tooltip")
         .attr("visibility", "hidden");
-
-      var circle;
 
       tooltip
         .append("rect")
@@ -513,6 +513,7 @@
 
       };
 
+      // Credit: Prof. Rz, Lecture 10.13.2021
       // click function that brings up tool tip
       circles.on("click", function () {
         tooltip.style("visibility", "visible");
