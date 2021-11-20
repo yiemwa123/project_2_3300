@@ -164,6 +164,7 @@
         .geoAlbersUsa()
         .fitSize([mapWidth, mapHeight], states);
       var path = d3.geoPath().projection(projection);
+      
       let viewport = map.append("g");
 
       viewport
@@ -452,12 +453,14 @@
         .attr("x", 0)
         .attr("y", 0);
 
+      // Credit: Prof. Rz, Lecture 10.25.2021
       function mapZoomed({ transform }) {
 
         viewport.attr("transform", transform.toString());
 
         viewport.select(".border").style("stroke-width", 2 / transform.k);
 
+        // modify the size of the circles with the zoom
         viewport
           .selectAll("circle.company")
           .attr("r", transform.k >= 2 ? 6 / transform.k : 4)
@@ -467,6 +470,7 @@
       map.call(zoom);
       map.call(zoom.transform, d3.zoomIdentity);
 
+      // Credit: Prof. Rz, Lecture 10.25.2021
       // function for when map is clicked on and zoomed in 
       function clicked(event, d) {
 
@@ -476,6 +480,8 @@
         let x = (bounds[0][0] + bounds[1][0]) / 2;
         let y = (bounds[0][1] + bounds[1][1]) / 2;
 
+
+        //reset all the points so that when you click on a new point, the previous information is cleared
         circles.style("fill", "black");
         d3.selectAll(".tooltipText").remove();
         tooltip.style("visibility", "hidden");
@@ -499,6 +505,7 @@
       function zoomOut() {
 
         map.transition().duration(1000).call(zoom.transform, d3.zoomIdentity);
+
       };
 
       // click function that brings up tool tip
